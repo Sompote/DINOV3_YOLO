@@ -2282,30 +2282,58 @@ class DINO3Backbone(nn.Module):
         """
         spec = self.dinov3_specs[model_name]
         
-        # Strategy 1: Try to load official DINOv3 from PyTorch Hub
+        # Strategy 1: Try to load official DINOv3 from PyTorch Hub (local loading method)
         try:
             import torch
-            # This will work when DINOv3 models are officially released on PyTorch Hub
-            hub_name = f"facebookresearch/dinov3:{model_name}"
-            print(f"🔄 Attempting to load official DINOv3 model from PyTorch Hub: {hub_name}")
+            # Try the official DINOv3 loading method from GitHub repo
+            print(f"🔄 Attempting to load official DINOv3 model from PyTorch Hub: {model_name}")
             
-            # Check if the model exists in PyTorch Hub
-            available_models = torch.hub.list('facebookresearch/dinov3', force_reload=False)
-            if model_name in available_models:
-                model = torch.hub.load('facebookresearch/dinov3', model_name, pretrained=True)
-                print(f"✅ Successfully loaded official DINOv3 model: {model_name}")
-                return model
+            # First try to check if the repository is available
+            try:
+                available_models = torch.hub.list('facebookresearch/dinov3', force_reload=False)
+                if model_name.replace('dinov3_', '') in available_models or model_name in available_models:
+                    # Try different naming conventions
+                    for variant_name in [model_name, model_name.replace('dinov3_', '')]:
+                        try:
+                            model = torch.hub.load('facebookresearch/dinov3', variant_name, source='github', pretrained=True)
+                            print(f"✅ Successfully loaded official DINOv3 model: {variant_name}")
+                            return model
+                        except:
+                            continue
+            except Exception as list_error:
+                # If listing fails, try direct loading anyway
+                for variant_name in [model_name, model_name.replace('dinov3_', '')]:
+                    try:
+                        model = torch.hub.load('facebookresearch/dinov3', variant_name, source='github', pretrained=True)
+                        print(f"✅ Successfully loaded official DINOv3 model: {variant_name}")
+                        return model
+                    except:
+                        continue
+                        
         except Exception as e:
             print(f"ℹ️  Official DINOv3 not available via PyTorch Hub: {e}")
         
-        # Strategy 2: Try to load from Hugging Face (if DINOv3 models become available)
+        # Strategy 2: Try to load from Hugging Face with official DINOv3 naming
         try:
             from transformers import AutoModel, AutoConfig
-            hf_model_name = f"facebook/dinov3-{model_name.replace('dinov3_', '')}"
-            print(f"🔄 Attempting to load DINOv3 from Hugging Face: {hf_model_name}")
-            model = AutoModel.from_pretrained(hf_model_name)
-            print(f"✅ Successfully loaded DINOv3 from Hugging Face: {hf_model_name}")
-            return model
+            # Try different Hugging Face naming patterns for DINOv3
+            variant_clean = model_name.replace('dinov3_', '')
+            hf_names = [
+                f"facebook/dinov3-{variant_clean}-pretrain-lvd1689m",
+                f"facebook/dinov3-{variant_clean}",
+                f"facebook/{model_name}",
+                f"facebookresearch/dinov3-{variant_clean}"
+            ]
+            
+            for hf_model_name in hf_names:
+                try:
+                    print(f"🔄 Attempting to load DINOv3 from Hugging Face: {hf_model_name}")
+                    model = AutoModel.from_pretrained(hf_model_name)
+                    print(f"✅ Successfully loaded DINOv3 from Hugging Face: {hf_model_name}")
+                    return model
+                except:
+                    continue
+                    
         except Exception as e:
             print(f"ℹ️  DINOv3 not available via Hugging Face: {e}")
         

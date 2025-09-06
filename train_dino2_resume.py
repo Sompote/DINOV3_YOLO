@@ -81,8 +81,10 @@ def main():
     parser.add_argument('--size', type=str, default=None,
                        choices=['n', 's', 'l', 'x'],
                        help='YOLOv13 model size (ignored if --weights is provided)')
-    parser.add_argument('--dino-variant', type=str, default='dinov2_vitb14',
+    parser.add_argument('--dino-variant', type=str, default='auto',
                        choices=[
+                           # Auto-selection
+                           'auto',
                            # DINO2 variants
                            'dinov2_vits14', 'dinov2_vitb14', 'dinov2_vitl14', 'dinov2_vitg14',
                            # DINOv3 ViT variants (official naming from Facebook Research)
@@ -151,23 +153,49 @@ def main():
                 has_dino = True
                 dino_type_found = "DINO3" if 'DINO3Backbone' in module_class else "DINO2"
                 
-                # Update DINO variant if specified
-                if hasattr(module, 'model_name') and args.dino_variant != module.model_name:
-                    print(f"🔄 Updating {dino_type_found} variant from {module.model_name} to {args.dino_variant}")
-                    module.model_name = args.dino_variant
+                # Auto-select appropriate variant if 'auto' is specified
+                if args.dino_variant == 'auto':
+                    if dino_type_found == "DINO3":
+                        # Default to dinov3_vitb16 for DINO3 models
+                        selected_variant = 'dinov3_vitb16'
+                    else:
+                        # Default to dinov2_vitb14 for DINO2 models
+                        selected_variant = 'dinov2_vitb14'
+                    print(f"🎯 Auto-selected {dino_type_found} variant: {selected_variant}")
+                else:
+                    selected_variant = args.dino_variant
+                    
+                    # Validate variant compatibility
+                    if dino_type_found == "DINO3" and not selected_variant.startswith('dinov3'):
+                        print(f"⚠️  Warning: Using DINOv2 variant '{selected_variant}' with DINO3 model may cause issues")
+                        print(f"   Recommend using a DINOv3 variant like 'dinov3_vitb16' instead")
+                    elif dino_type_found == "DINO2" and selected_variant.startswith('dinov3'):
+                        print(f"⚠️  Warning: Using DINOv3 variant '{selected_variant}' with DINO2 model may cause issues")
+                        print(f"   Recommend using a DINOv2 variant like 'dinov2_vitb14' instead")
+                
+                # Update DINO variant if different from current
+                if hasattr(module, 'model_name') and selected_variant != module.model_name:
+                    print(f"🔄 Updating {dino_type_found} variant from {module.model_name} to {selected_variant}")
+                    module.model_name = selected_variant
                     # Reinitialize the model with new variant if method exists
                     if hasattr(module, '_initialize_dino_model'):
-                        module._initialize_dino_model()
+                        try:
+                            module._initialize_dino_model()
+                        except Exception as e:
+                            print(f"⚠️  Failed to reinitialize DINO model with variant {selected_variant}: {e}")
+                            print(f"   Continuing with original variant: {module.model_name}")
+                else:
+                    selected_variant = getattr(module, 'model_name', 'unknown')
                 
                 # Configure freezing
                 if args.freeze_dino2:
                     if hasattr(module, 'freeze_backbone_layers'):
                         module.freeze_backbone_layers()
-                    print(f"✅ {dino_type_found} backbone frozen: {args.dino_variant}")
+                    print(f"✅ {dino_type_found} backbone frozen: {selected_variant}")
                 else:
                     if hasattr(module, 'unfreeze_backbone'):
                         module.unfreeze_backbone()
-                    print(f"🔓 {dino_type_found} backbone unfrozen: {args.dino_variant}")
+                    print(f"🔓 {dino_type_found} backbone unfrozen: {selected_variant}")
         
         if not has_dino and args.weights:
             print(f"ℹ️  Loaded model from weights (may or may not have DINO)")
