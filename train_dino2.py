@@ -85,7 +85,12 @@ def main():
                        choices=['yolov13', 'yolov13n', 'yolov13s', 'yolov13l', 'yolov13x',
                                'yolov13-dino2', 'yolov13-dino2-simple', 
                                'yolov13-dino2-working', 'yolov13-dino2-fixed',
-                               'yolov13-dino3', 'yolov13-dino3-dual', 'yolov13-dino3-p3', 'yolov13-dino3-multi'],
+                               # DINO3 single-scale variants
+                               'yolov13-dino3', 'yolov13-dino3-n', 'yolov13-dino3-s', 'yolov13-dino3-l', 'yolov13-dino3-x',
+                               # DINO3 dual-scale variants
+                               'yolov13-dino3-dual', 'yolov13-dino3-dual-n', 'yolov13-dino3-dual-s', 'yolov13-dino3-dual-l', 'yolov13-dino3-dual-x',
+                               # DINO3 other variants
+                               'yolov13-dino3-p3', 'yolov13-dino3-multi'],
                        help='YOLOv13 model variant')
     parser.add_argument('--size', type=str, default=None,
                        choices=['n', 's', 'l', 'x'],
@@ -113,10 +118,11 @@ def main():
     # Determine final model configuration
     final_model = args.model
     if args.size and not final_model.endswith(args.size):
-        # Apply size variant to base models
-        if final_model in ['yolov13', 'yolov13-dino2', 'yolov13-dino2-simple', 
-                          'yolov13-dino2-working', 'yolov13-dino2-fixed', 'yolov13-dino3',
-                          'yolov13-dino3-dual', 'yolov13-dino3-p3', 'yolov13-dino3-multi']:
+        # Apply size variant to base models (those without size suffix)
+        base_models = ['yolov13', 'yolov13-dino2', 'yolov13-dino2-simple', 
+                      'yolov13-dino2-working', 'yolov13-dino2-fixed', 
+                      'yolov13-dino3', 'yolov13-dino3-dual', 'yolov13-dino3-p3', 'yolov13-dino3-multi']
+        if final_model in base_models:
             if final_model == 'yolov13':
                 final_model = f'yolov13{args.size}'
             else:

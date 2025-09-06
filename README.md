@@ -45,18 +45,34 @@
 
 > *Small objects show +12-20% improvement with P3 enhancement
 
-### 🏗️ Size Variants
+### 🏗️ Complete Size Matrix
 
 <details>
-<summary>Click to expand size variants</summary>
+<summary>Click to expand all size variants</summary>
 
-| Model | Architecture | Parameters | GFLOPs | Description |
-|:------|:-------------|:-----------|:-------|:------------|
-| `yolov13-dino3-n` | Nano + DINOv3 | 33.5M | 5.0 | Lightweight deployment |
-| `yolov13-dino3-s` | Small + DINOv3 | 56.8M | 10.2 | Balanced speed/accuracy |
-| `yolov13-dino3` | Base + DINOv3 | 99.4M | 18.1 | **Recommended** |
-| `yolov13-dino3-l` | Large + DINOv3 | 243.2M | 45.6 | High accuracy |
-| `yolov13-dino3-x` | XLarge + DINOv3 | 317.3M | 62.9 | Research/Competition |
+#### Single-Scale DINO3 Enhancement (P4)
+| Model | Parameters | GFLOPs | Description | Use Case |
+|:------|:-----------|:-------|:------------|:---------|
+| `yolov13-dino3-n` | 35M | 5.8 | Nano + DINO3 | ⚡ Mobile/Edge deployment |
+| `yolov13-dino3-s` | 58M | 11.2 | Small + DINO3 | 🎯 Balanced performance |
+| `yolov13-dino3` | 99M | 18.1 | Base + DINO3 | ✅ **Recommended** |
+| `yolov13-dino3-l` | 148M | 34.5 | Large + DINO3 | 🎪 High accuracy |
+| `yolov13-dino3-x` | 198M | 48.2 | XLarge + DINO3 | 🏆 Maximum performance |
+
+#### Dual-Scale DINO3 Enhancement (P3+P4)
+| Model | Parameters | GFLOPs | Description | Use Case |
+|:------|:-----------|:-------|:------------|:---------|
+| `yolov13-dino3-dual-n` | 45M | 8.5 | Nano dual-scale | ⚡ Fast multi-scale |
+| `yolov13-dino3-dual-s` | 98M | 18.9 | Small dual-scale | 🎯 Balanced multi-scale |
+| `yolov13-dino3-dual` | 188M | 35.9 | Base dual-scale | ✅ **Recommended** |
+| `yolov13-dino3-dual-l` | 238M | 52.3 | Large dual-scale | 🎪 High accuracy dual |
+| `yolov13-dino3-dual-x` | 318M | 73.8 | XLarge dual-scale | 🏆 Maximum dual-scale |
+
+#### Specialized Architectures
+| Model | Parameters | GFLOPs | Enhancement | Use Case |
+|:------|:-----------|:-------|:------------|:---------|
+| `yolov13-dino3-p3` | 95M | 17.8 | P3 only | 🔍 Small object focus |
+| `yolov13-dino3-multi` | 451M | 87.1 | P3+P4+P5 | 🚀 Ultimate performance |
 
 </details>
 
@@ -92,19 +108,22 @@ python dino_inference.py --weights best.pt --source images/ --save
 ### 🏋️ Training
 
 ```bash
-# Train DINO3 model (latest)
+# Train DINO3 model (recommended)
 python train_dino2.py \
     --data coco.yaml \
     --model yolov13-dino3 \
     --epochs 100 \
     --freeze-dino2
 
-# Multi-scale training for complex datasets
-python train_dino2.py \
-    --data custom.yaml \
-    --model yolov13-dino3-dual \
-    --dino-variant dinov3_vitl16 \
-    --epochs 150
+# Train different sizes
+python train_dino2.py --data coco.yaml --model yolov13-dino3-n    # Nano (fast)
+python train_dino2.py --data coco.yaml --model yolov13-dino3-s    # Small  
+python train_dino2.py --data coco.yaml --model yolov13-dino3-l    # Large
+python train_dino2.py --data coco.yaml --model yolov13-dino3-x    # XLarge
+
+# Multi-scale training with size variants
+python train_dino2.py --data custom.yaml --model yolov13-dino3-dual-s    # Small dual-scale
+python train_dino2.py --data custom.yaml --model yolov13-dino3-dual-l    # Large dual-scale
 ```
 
 ## 🏗️ Architecture
@@ -262,10 +281,18 @@ python dino_inference.py \
 
 ```bash
 # 🎯 General purpose (recommended starting point)
---model yolov13-dino3
+--model yolov13-dino3              # Base model
+--model yolov13-dino3-n            # Nano (fast inference)
+--model yolov13-dino3-s            # Small (balanced)
+--model yolov13-dino3-l            # Large (high accuracy)
+--model yolov13-dino3-x            # XLarge (maximum accuracy)
 
-# ⚖️ Balanced performance for mixed object sizes
---model yolov13-dino3-dual
+# ⚖️ Balanced performance for mixed object sizes  
+--model yolov13-dino3-dual         # Base dual-scale
+--model yolov13-dino3-dual-n       # Nano dual-scale
+--model yolov13-dino3-dual-s       # Small dual-scale
+--model yolov13-dino3-dual-l       # Large dual-scale
+--model yolov13-dino3-dual-x       # XLarge dual-scale
 
 # 🔍 Small object detection focus
 --model yolov13-dino3-p3

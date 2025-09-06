@@ -1,0 +1,71 @@
+# YOLOv13n with DINOv3 Dual-Scale Enhancement (Nano variant)
+# Usage: YOLO('yolov13-dino3-dual-n.yaml') - P3+P4 enhanced, nano size
+# Parameters: ~45M | GFLOPs: ~8.5
+
+nc: 80 # number of classes
+scales:
+  n: [0.50, 0.25, 1024]   # Nano
+
+backbone:
+  # [from, repeats, module, args]
+  # YOLOv13 with YOLOv3-inspired darknet backbone (Nano scaling)
+  - [-1, 1, Conv, [32, 3, 1]]       # 0
+  - [-1, 1, Conv, [64, 3, 2]]       # 1-P1/2
+  - [-1, 1, Bottleneck, [64]]       # 2
+  - [-1, 1, Conv, [128, 3, 2]]      # 3-P2/4
+  - [-1, 1, Bottleneck, [128]]      # 4
+  - [-1, 1, Conv, [256, 3, 2]]      # 5-P3/8
+  - [-1, 2, Bottleneck, [256]]      # 6
+  
+  # DINOv3 enhancement at P3 level (256 channels -> 64 for nano)
+  - [-1, 1, DINO3Backbone, ['dinov3_vits16', True, 64]]  # 7: P3 DINO3 enhancement
+  
+  - [-1, 1, Conv, [512, 3, 2]]      # 8-P4/16
+  - [-1, 2, Bottleneck, [512]]      # 9
+  
+  # DINOv3 enhancement at P4 level (512 channels -> 128 for nano)
+  - [-1, 1, DINO3Backbone, ['dinov3_vits16', True, 128]]  # 10: P4 DINO3 enhancement
+  
+  # Continue YOLOv3-style processing
+  - [-1, 1, Conv, [256, 3, 2]]      # 11-P5/32
+  - [-1, 1, Bottleneck, [256]]      # 12
+
+head:
+  # YOLOv13 head with dual DINO3-enhanced features (nano scaling)
+  
+  # P5 processing (large objects)
+  - [-1, 1, Bottleneck, [256, False]]      # 13
+  - [-1, 1, Conv, [128, 1, 1]]             # 14
+  - [-1, 1, Conv, [256, 3, 1]]             # 15
+  - [-1, 1, Conv, [128, 1, 1]]             # 16
+  - [-1, 1, Conv, [256, 3, 1]]             # 17 (P5/32-large)
+
+  # P4 branch (medium objects) - uses DINO3-enhanced features
+  - [-2, 1, Conv, [64, 1, 1]]              # 18
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 19
+  - [[-1, 10], 1, Concat, [1]]             # 20: cat DINO3-enhanced P4 features
+  - [-1, 1, Conv, [128, 1, 1]]             # 21
+  - [-1, 1, Bottleneck, [128, False]]      # 22
+  - [-1, 1, Conv, [64, 1, 1]]              # 23
+  - [-1, 1, Conv, [128, 3, 1]]             # 24 (P4/16-medium)
+
+  # P3 branch (small objects) - uses DINO3-enhanced features
+  - [-2, 1, Conv, [32, 1, 1]]              # 25
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 26
+  - [[-1, 7], 1, Concat, [1]]              # 27: cat DINO3-enhanced P3 features
+  - [-1, 1, Conv, [64, 1, 1]]              # 28
+  - [-1, 1, Bottleneck, [64, False]]       # 29
+  - [-1, 1, Bottleneck, [64, False]]       # 30 (P3/8-small)
+
+  # P3 -> P4 connection
+  - [-1, 1, Conv, [64, 3, 2]]              # 31
+  - [[-1, 24], 1, Concat, [1]]             # 32
+  - [-1, 1, Conv, [128, 3, 1]]             # 33 (final P4)
+
+  # P4 -> P5 connection  
+  - [-1, 1, Conv, [128, 3, 2]]             # 34
+  - [[-1, 17], 1, Concat, [1]]             # 35
+  - [-1, 1, Conv, [256, 3, 1]]             # 36 (final P5)
+
+  # Detection heads - P3(64ch), P4(128ch), P5(256ch)
+  - [[30, 33, 36], 1, Detect, [nc]]        # 37: Detect(P3, P4, P5)
