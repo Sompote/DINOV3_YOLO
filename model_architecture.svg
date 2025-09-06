@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#ffffff"/>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#2c3e50">
+    YOLOv13 + DINO Vision Transformer Architecture
+  </text>
+  
+  <!-- Input -->
+  <rect x="50" y="60" width="100" height="40" rx="5" fill="#e1f5fe" stroke="#01579b" stroke-width="2"/>
+  <text x="100" y="85" text-anchor="middle" font-size="12" font-weight="bold">Input 3×640×640</text>
+  
+  <!-- YOLOv13 Backbone -->
+  <rect x="50" y="130" width="300" height="80" rx="5" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="2"/>
+  <text x="200" y="150" text-anchor="middle" font-size="14" font-weight="bold">YOLOv13 Backbone</text>
+  <text x="200" y="170" text-anchor="middle" font-size="11">Conv→Bottleneck→P3(256)→P4(512)→P5(1024)</text>
+  <text x="200" y="190" text-anchor="middle" font-size="10">YOLOv3-Inspired Darknet Style</text>
+  
+  <!-- DINO Enhancement -->
+  <rect x="400" y="130" width="150" height="80" rx="5" fill="#fff3e0" stroke="#ef6c00" stroke-width="2"/>
+  <text x="475" y="150" text-anchor="middle" font-size="14" font-weight="bold">DINO3 ViT</text>
+  <text x="475" y="170" text-anchor="middle" font-size="11">12 Transformer Layers</text>
+  <text x="475" y="190" text-anchor="middle" font-size="10">86M params (frozen)</text>
+  
+  <!-- Multi-Scale Head -->
+  <rect x="50" y="250" width="500" height="100" rx="5" fill="#e8f5e8" stroke="#2e7d32" stroke-width="2"/>
+  <text x="300" y="275" text-anchor="middle" font-size="14" font-weight="bold">Multi-Scale Detection Head</text>
+  
+  <rect x="80" y="290" width="100" height="40" fill="#c8e6c8" stroke="#4caf50"/>
+  <text x="130" y="315" text-anchor="middle" font-size="11">P3 Small 80×80</text>
+  
+  <rect x="200" y="290" width="120" height="40" fill="#ffecb3" stroke="#ffa000" stroke-width="2"/>
+  <text x="260" y="315" text-anchor="middle" font-size="11">P4 Medium 40×40 ⭐</text>
+  
+  <rect x="340" y="290" width="100" height="40" fill="#c8e6c8" stroke="#4caf50"/>
+  <text x="390" y="315" text-anchor="middle" font-size="11">P5 Large 20×20</text>
+  
+  <rect x="460" y="290" width="70" height="40" fill="#e1f5fe" stroke="#0277bd"/>
+  <text x="495" y="315" text-anchor="middle" font-size="11">FPN+PAN</text>
+  
+  <!-- Output -->
+  <rect x="200" y="380" width="200" height="50" rx="5" fill="#fce4ec" stroke="#c2185b" stroke-width="2"/>
+  <text x="300" y="410" text-anchor="middle" font-size="14" font-weight="bold">Detection Output</text>
+  
+  <!-- Statistics -->
+  <rect x="600" y="130" width="150" height="150" rx="5" fill="#f5f5f5" stroke="#424242" stroke-width="2"/>
+  <text x="675" y="150" text-anchor="middle" font-size="12" font-weight="bold">Model Stats</text>
+  <text x="620" y="170" font-size="10">DINO3: 99.4M params</text>
+  <text x="620" y="185" font-size="10">FLOPs: 18.1G</text>
+  <text x="620" y="200" font-size="10">DINO2: 95.8M params</text>
+  <text x="620" y="220" font-size="10">Features:</text>
+  <text x="620" y="235" font-size="9">• Global Context</text>
+  <text x="620" y="250" font-size="9">• Transfer Learning</text>
+  <text x="620" y="265" font-size="9">• Small Dataset Ready</text>
+  
+  <!-- Arrows -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#424242"/>
+    </marker>
+  </defs>
+  
+  <line x1="150" y1="80" x2="150" y2="130" stroke="#424242" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="350" y1="170" x2="400" y2="170" stroke="#ff8f00" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="400" y1="190" x2="350" y2="190" stroke="#ff8f00" stroke-width="2" stroke-dasharray="3,3"/>
+  <line x1="200" y1="210" x2="200" y2="250" stroke="#424242" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="300" y1="350" x2="300" y2="380" stroke="#424242" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <!-- Legend -->
+  <rect x="50" y="470" width="700" height="80" rx="5" fill="#f8f9fa" stroke="#dee2e6"/>
+  <text x="400" y="490" text-anchor="middle" font-size="14" font-weight="bold">Key Architecture Features</text>
+  
+  <rect x="70" y="505" width="12" height="12" fill="#ffecb3" stroke="#ffa000"/>
+  <text x="90" y="515" font-size="11">DINO Enhanced (P4 Level)</text>
+  
+  <rect x="250" y="505" width="12" height="12" fill="#c8e6c8" stroke="#4caf50"/>
+  <text x="270" y="515" font-size="11">Standard Detection</text>
+  
+  <rect x="420" y="505" width="12" height="12" fill="#e1f5fe" stroke="#0277bd"/>
+  <text x="440" y="515" font-size="11">Feature Fusion</text>
+  
+  <text x="70" y="535" font-size="11" font-weight="bold">Benefits: Global Context Understanding • Superior Small Object Detection • Transfer Learning • Small Dataset Excellence</text>
+</svg>

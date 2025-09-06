@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1400" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="inputGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e3f2fd;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#bbdefb;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="backboneGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f3e5f5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e1bee7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="dinoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fff8e1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffecb3;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="headGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e8f5e8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c8e6c8;stop-opacity:1" />
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#424242"/>
+    </marker>
+    <marker id="dinoArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ff8f00"/>
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1400" height="1000" fill="#fafafa"/>
+  
+  <!-- Title -->
+  <text x="700" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1a237e">
+    YOLOv13 + DINO Vision Transformer - Detailed Architecture
+  </text>
+  
+  <!-- Input Layer -->
+  <rect x="50" y="70" width="120" height="50" rx="5" fill="url(#inputGrad)" stroke="#1565c0" stroke-width="2"/>
+  <text x="110" y="90" text-anchor="middle" font-size="12" font-weight="bold" fill="#0d47a1">Input Image</text>
+  <text x="110" y="105" text-anchor="middle" font-size="10" fill="#1565c0">3×640×640</text>
+  
+  <!-- YOLOv13 Backbone - DINO3 Version -->
+  <rect x="50" y="150" width="900" height="300" rx="8" fill="url(#backboneGrad)" stroke="#6a1b9a" stroke-width="2"/>
+  <text x="500" y="175" text-anchor="middle" font-size="16" font-weight="bold" fill="#4a148c">YOLOv13 Backbone with DINO3 Integration (YOLOv3-Inspired)</text>
+  
+  <!-- Backbone Layer Details -->
+  <g id="backbone-layers">
+    <!-- Layer 0: Conv(32) -->
+    <rect x="70" y="190" width="60" height="35" rx="3" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="100" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="#1a237e">Layer 0</text>
+    <text x="100" y="215" text-anchor="middle" font-size="8" fill="#1a237e">Conv(32, 3×3)</text>
+    
+    <!-- Layer 1: Conv(64) P1/2 -->
+    <rect x="140" y="190" width="60" height="35" rx="3" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="170" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="#1a237e">Layer 1</text>
+    <text x="170" y="215" text-anchor="middle" font-size="8" fill="#1a237e">Conv(64) P1/2</text>
+    
+    <!-- Layer 2: Bottleneck(64) -->
+    <rect x="210" y="190" width="70" height="35" rx="3" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="245" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="#1a237e">Layer 2</text>
+    <text x="245" y="215" text-anchor="middle" font-size="8" fill="#1a237e">Bottleneck(64)</text>
+    
+    <!-- Layer 3: Conv(128) P2/4 -->
+    <rect x="290" y="190" width="60" height="35" rx="3" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="320" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="#1a237e">Layer 3</text>
+    <text x="320" y="215" text-anchor="middle" font-size="8" fill="#1a237e">Conv(128) P2/4</text>
+    
+    <!-- Layer 4: 2×Bottleneck(128) -->
+    <rect x="360" y="190" width="80" height="35" rx="3" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="400" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="#1a237e">Layer 4</text>
+    <text x="400" y="215" text-anchor="middle" font-size="8" fill="#1a237e">2×Bottleneck(128)</text>
+    
+    <!-- Layer 5: Conv(256) P3/8 -->
+    <rect x="450" y="190" width="60" height="35" rx="3" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="480" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="#1a237e">Layer 5</text>
+    <text x="480" y="215" text-anchor="middle" font-size="8" fill="#1a237e">Conv(256) P3/8</text>
+    
+    <!-- Layer 6: 8×Bottleneck(256) - P3 Features -->
+    <rect x="520" y="190" width="90" height="35" rx="3" fill="#fff3e0" stroke="#ff8f00" stroke-width="1"/>
+    <text x="565" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="#e65100">Layer 6 (P3)</text>
+    <text x="565" y="215" text-anchor="middle" font-size="8" fill="#e65100">8×Bottleneck(256)</text>
+    
+    <!-- Layer 7: Conv(512) P4/16 -->
+    <rect x="620" y="190" width="60" height="35" rx="3" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="650" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="#1a237e">Layer 7</text>
+    <text x="650" y="215" text-anchor="middle" font-size="8" fill="#1a237e">Conv(512) P4/16</text>
+    
+    <!-- Layer 8: 8×Bottleneck(512) -->
+    <rect x="690" y="190" width="90" height="35" rx="3" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="735" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="#1a237e">Layer 8</text>
+    <text x="735" y="215" text-anchor="middle" font-size="8" fill="#1a237e">8×Bottleneck(512)</text>
+    
+    <!-- Layer 9: DINO3 Enhancement -->
+    <rect x="790" y="190" width="100" height="35" rx="3" fill="#ffecb3" stroke="#ffa000" stroke-width="3"/>
+    <text x="840" y="205" text-anchor="middle" font-size="9" font-weight="bold" fill="#e65100">Layer 9 (P4)</text>
+    <text x="840" y="215" text-anchor="middle" font-size="8" fill="#e65100">DINO3 Enhanced</text>
+    
+    <!-- Second Row -->
+    <!-- Layer 10: Conv(1024) P5/32 -->
+    <rect x="70" y="240" width="70" height="35" rx="3" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="105" y="255" text-anchor="middle" font-size="9" font-weight="bold" fill="#1a237e">Layer 10</text>
+    <text x="105" y="265" text-anchor="middle" font-size="8" fill="#1a237e">Conv(1024) P5/32</text>
+    
+    <!-- Layer 11: 4×Bottleneck(1024) -->
+    <rect x="150" y="240" width="90" height="35" rx="3" fill="#e8eaf6" stroke="#3f51b5" stroke-width="1"/>
+    <text x="195" y="255" text-anchor="middle" font-size="9" font-weight="bold" fill="#1a237e">Layer 11</text>
+    <text x="195" y="265" text-anchor="middle" font-size="8" fill="#1a237e">4×Bottleneck(1024)</text>
+    
+    <!-- Channel dimensions -->
+    <text x="70" y="295" font-size="10" font-weight="bold" fill="#6a1b9a">Channel Flow:</text>
+    <text x="70" y="310" font-size="9" fill="#6a1b9a">3→32→64→128→256→512→DINO3(512)→1024</text>
+    <text x="70" y="325" font-size="9" fill="#6a1b9a">Spatial: 640×640→320×320→160×160→80×80→40×40→20×20</text>
+    
+    <!-- Feature extraction points -->
+    <circle cx="565" cy="230" r="6" fill="#ff8f00" stroke="#e65100" stroke-width="2"/>
+    <text x="575" y="235" font-size="8" fill="#e65100">P3 Out</text>
+    
+    <circle cx="840" cy="230" r="6" fill="#ff8f00" stroke="#e65100" stroke-width="2"/>
+    <text x="850" y="235" font-size="8" fill="#e65100">P4 Enhanced</text>
+    
+    <circle cx="195" cy="275" r="6" fill="#ff8f00" stroke="#e65100" stroke-width="2"/>
+    <text x="205" y="280" font-size="8" fill="#e65100">P5 Out</text>
+  </g>
+  
+  <!-- DINO3 Vision Transformer Detail -->
+  <rect x="1000" y="150" width="350" height="300" rx="8" fill="url(#dinoGrad)" stroke="#ef6c00" stroke-width="3"/>
+  <text x="1175" y="175" text-anchor="middle" font-size="16" font-weight="bold" fill="#bf360c">DINO3 Vision Transformer</text>
+  
+  <!-- DINO3 Internal Architecture -->
+  <g id="dino3-details">
+    <text x="1175" y="200" text-anchor="middle" font-size="12" font-weight="bold" fill="#d84315">DINOv3 (facebook/dinov3-base)</text>
+    
+    <!-- Input Processing -->
+    <rect x="1020" y="210" width="80" height="25" rx="3" fill="#fff8e1" stroke="#ff8f00" stroke-width="1"/>
+    <text x="1060" y="227" text-anchor="middle" font-size="8" fill="#e65100">Input: 512×40×40</text>
+    
+    <rect x="1110" y="210" width="80" height="25" rx="3" fill="#fff8e1" stroke="#ff8f00" stroke-width="1"/>
+    <text x="1150" y="227" text-anchor="middle" font-size="8" fill="#e65100">RGB Projection</text>
+    
+    <rect x="1200" y="210" width="80" height="25" rx="3" fill="#fff8e1" stroke="#ff8f00" stroke-width="1"/>
+    <text x="1240" y="227" text-anchor="middle" font-size="8" fill="#e65100">Resize→224×224</text>
+    
+    <!-- Patch Embedding -->
+    <rect x="1020" y="245" width="100" height="25" rx="3" fill="#fff8e1" stroke="#ff8f00" stroke-width="1"/>
+    <text x="1070" y="262" text-anchor="middle" font-size="8" fill="#e65100">Patch Embedding</text>
+    <text x="1070" y="270" text-anchor="middle" font-size="7" fill="#e65100">14×14 patches</text>
+    
+    <!-- Transformer Core -->
+    <rect x="1130" y="245" width="140" height="40" rx="5" fill="#ffecb3" stroke="#ffa000" stroke-width="2"/>
+    <text x="1200" y="262" text-anchor="middle" font-size="10" font-weight="bold" fill="#e65100">12 Transformer Layers</text>
+    <text x="1200" y="275" text-anchor="middle" font-size="8" fill="#e65100">768-dim embeddings (Frozen)</text>
+    
+    <!-- Feature Adaptation -->
+    <rect x="1020" y="295" width="80" height="25" rx="3" fill="#fff8e1" stroke="#ff8f00" stroke-width="1"/>
+    <text x="1060" y="312" text-anchor="middle" font-size="8" fill="#e65100">Feature Adapter</text>
+    <text x="1060" y="320" text-anchor="middle" font-size="7" fill="#e65100">768→512 channels</text>
+    
+    <rect x="1110" y="295" width="80" height="25" rx="3" fill="#fff8e1" stroke="#ff8f00" stroke-width="1"/>
+    <text x="1150" y="312" text-anchor="middle" font-size="8" fill="#e65100">Spatial Projection</text>
+    <text x="1150" y="320" text-anchor="middle" font-size="7" fill="#e65100">Back to 40×40</text>
+    
+    <rect x="1200" y="295" width="80" height="25" rx="3" fill="#fff8e1" stroke="#ff8f00" stroke-width="1"/>
+    <text x="1240" y="312" text-anchor="middle" font-size="8" fill="#e65100">Output: 512ch</text>
+    
+    <!-- Model Stats -->
+    <text x="1020" y="340" font-size="10" font-weight="bold" fill="#bf360c">Model Statistics:</text>
+    <text x="1020" y="355" font-size="9" fill="#d84315">• Parameters: ~86M (frozen)</text>
+    <text x="1020" y="370" font-size="9" fill="#d84315">• Hidden Size: 768</text>
+    <text x="1020" y="385" font-size="9" fill="#d84315">• Patch Size: 14×14</text>
+    <text x="1020" y="400" font-size="9" fill="#d84315">• Attention Heads: 12</text>
+    <text x="1020" y="415" font-size="9" fill="#d84315">• Global Context Understanding</text>
+  </g>
+  
+  <!-- YOLOv13 Multi-Scale Detection Head -->
+  <rect x="50" y="480" width="1300" height="350" rx="8" fill="url(#headGrad)" stroke="#2e7d32" stroke-width="2"/>
+  <text x="700" y="505" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b5e20">YOLOv13 Multi-Scale Detection Head with DINO3 Enhancement</text>
+  
+  <!-- Head Layer Details -->
+  <g id="head-layers">
+    <!-- P5 Branch (Large Objects) -->
+    <rect x="70" y="530" width="300" height="80" rx="5" fill="#c8e6c8" stroke="#4caf50" stroke-width="1"/>
+    <text x="220" y="550" text-anchor="middle" font-size="12" font-weight="bold" fill="#2e7d32">P5 Branch - Large Objects (20×20)</text>
+    
+    <rect x="80" y="560" width="60" height="20" fill="#e8f5e8" stroke="#4caf50"/>
+    <text x="110" y="573" text-anchor="middle" font-size="8">L12: BN(1024)</text>
+    
+    <rect x="150" y="560" width="60" height="20" fill="#e8f5e8" stroke="#4caf50"/>
+    <text x="180" y="573" text-anchor="middle" font-size="8">L13: Conv(512)</text>
+    
+    <rect x="220" y="560" width="60" height="20" fill="#e8f5e8" stroke="#4caf50"/>
+    <text x="250" y="573" text-anchor="middle" font-size="8">L14: Conv(1024)</text>
+    
+    <rect x="290" y="560" width="60" height="20" fill="#e8f5e8" stroke="#4caf50"/>
+    <text x="320" y="573" text-anchor="middle" font-size="8">L15: Conv(512)</text>
+    
+    <rect x="150" y="585" width="80" height="20" fill="#e8f5e8" stroke="#4caf50"/>
+    <text x="190" y="598" text-anchor="middle" font-size="8">L16: Conv(1024) OUT</text>
+    
+    <!-- P4 Branch (Medium Objects) - DINO3 Enhanced -->
+    <rect x="400" y="530" width="350" height="80" rx="5" fill="#ffecb3" stroke="#ffa000" stroke-width="3"/>
+    <text x="575" y="550" text-anchor="middle" font-size="12" font-weight="bold" fill="#e65100">P4 Branch - Medium Objects (40×40) ⭐ DINO3 Enhanced</text>
+    
+    <rect x="410" y="560" width="50" height="20" fill="#fff8e1" stroke="#ff8f00"/>
+    <text x="435" y="573" text-anchor="middle" font-size="8">L17: Conv(256)</text>
+    
+    <rect x="470" y="560" width="50" height="20" fill="#fff8e1" stroke="#ff8f00"/>
+    <text x="495" y="573" text-anchor="middle" font-size="8">L18: Upsample</text>
+    
+    <rect x="530" y="560" width="70" height="20" fill="#fff8e1" stroke="#ff8f00"/>
+    <text x="565" y="573" text-anchor="middle" font-size="8">L19: Concat DINO3</text>
+    
+    <rect x="610" y="560" width="50" height="20" fill="#fff8e1" stroke="#ff8f00"/>
+    <text x="635" y="573" text-anchor="middle" font-size="8">L20: Conv(512)</text>
+    
+    <rect x="670" y="560" width="70" height="20" fill="#fff8e1" stroke="#ff8f00"/>
+    <text x="705" y="573" text-anchor="middle" font-size="8">L21: Bottleneck</text>
+    
+    <rect x="490" y="585" width="100" height="20" fill="#fff8e1" stroke="#ff8f00"/>
+    <text x="540" y="598" text-anchor="middle" font-size="8">L22-23: Conv(256)→Conv(512)</text>
+    
+    <!-- P3 Branch (Small Objects) -->
+    <rect x="780" y="530" width="300" height="80" rx="5" fill="#c8e6c8" stroke="#4caf50" stroke-width="1"/>
+    <text x="930" y="550" text-anchor="middle" font-size="12" font-weight="bold" fill="#2e7d32">P3 Branch - Small Objects (80×80)</text>
+    
+    <rect x="790" y="560" width="50" height="20" fill="#e8f5e8" stroke="#4caf50"/>
+    <text x="815" y="573" text-anchor="middle" font-size="8">L24: Conv(128)</text>
+    
+    <rect x="850" y="560" width="50" height="20" fill="#e8f5e8" stroke="#4caf50"/>
+    <text x="875" y="573" text-anchor="middle" font-size="8">L25: Upsample</text>
+    
+    <rect x="910" y="560" width="60" height="20" fill="#e8f5e8" stroke="#4caf50"/>
+    <text x="940" y="573" text-anchor="middle" font-size="8">L26: Concat P3</text>
+    
+    <rect x="980" y="560" width="50" height="20" fill="#e8f5e8" stroke="#4caf50"/>
+    <text x="1005" y="573" text-anchor="middle" font-size="8">L27: Conv(256)</text>
+    
+    <rect x="850" y="585" width="120" height="20" fill="#e8f5e8" stroke="#4caf50"/>
+    <text x="910" y="598" text-anchor="middle" font-size="8">L28-29: 2×Bottleneck(256)</text>
+    
+    <!-- Feature Fusion (FPN + PAN) -->
+    <rect x="1110" y="530" width="220" height="80" rx="5" fill="#e1f5fe" stroke="#0277bd" stroke-width="1"/>
+    <text x="1220" y="550" text-anchor="middle" font-size="12" font-weight="bold" fill="#01579b">Feature Fusion (FPN + PAN)</text>
+    
+    <rect x="1120" y="560" width="80" height="20" fill="#e3f2fd" stroke="#1976d2"/>
+    <text x="1160" y="573" text-anchor="middle" font-size="8">L30-32: P3→P4</text>
+    
+    <rect x="1210" y="560" width="80" height="20" fill="#e3f2fd" stroke="#1976d2"/>
+    <text x="1250" y="573" text-anchor="middle" font-size="8">L33-35: P4→P5</text>
+    
+    <rect x="1120" y="585" width="180" height="20" fill="#e3f2fd" stroke="#1976d2"/>
+    <text x="1210" y="598" text-anchor="middle" font-size="8">Bottom-up + Top-down Pathways</text>
+    
+    <!-- YOLOv13 Specific Modules -->
+    <text x="70" y="640" font-size="12" font-weight="bold" fill="#2e7d32">YOLOv13 Enhanced Modules:</text>
+    
+    <rect x="70" y="650" width="100" height="30" fill="#f3e5f5" stroke="#7b1fa2"/>
+    <text x="120" y="670" text-anchor="middle" font-size="10" font-weight="bold" fill="#4a148c">HyperACE</text>
+    
+    <rect x="180" y="650" width="100" height="30" fill="#f3e5f5" stroke="#7b1fa2"/>
+    <text x="230" y="670" text-anchor="middle" font-size="10" font-weight="bold" fill="#4a148c">FullPAD</text>
+    
+    <rect x="290" y="650" width="100" height="30" fill="#f3e5f5" stroke="#7b1fa2"/>
+    <text x="340" y="670" text-anchor="middle" font-size="10" font-weight="bold" fill="#4a148c">A2C2f Blocks</text>
+    
+    <rect x="400" y="650" width="100" height="30" fill="#f3e5f5" stroke="#7b1fa2"/>
+    <text x="450" y="670" text-anchor="middle" font-size="10" font-weight="bold" fill="#4a148c">DSC3k2</text>
+    
+    <rect x="510" y="650" width="120" height="30" fill="#f3e5f5" stroke="#7b1fa2"/>
+    <text x="570" y="670" text-anchor="middle" font-size="10" font-weight="bold" fill="#4a148c">FullPAD Tunnel</text>
+    
+    <!-- Channel Information -->
+    <text x="70" y="710" font-size="11" font-weight="bold" fill="#2e7d32">Channel Dimensions:</text>
+    <text x="70" y="725" font-size="10" fill="#388e3c">P3: 256 channels (80×80) | P4: 512 channels (40×40) DINO3 Enhanced | P5: 1024 channels (20×20)</text>
+    <text x="70" y="740" font-size="10" fill="#388e3c">Final Detection: P3(256ch) + P4(512ch) + P5(1024ch) → Multi-Scale Object Detection</text>
+  </g>
+  
+  <!-- Detection Output -->
+  <rect x="450" y="860" width="500" height="80" rx="8" fill="#fce4ec" stroke="#c2185b" stroke-width="2"/>
+  <text x="700" y="885" text-anchor="middle" font-size="16" font-weight="bold" fill="#880e4f">Final Detection Output (Layer 36)</text>
+  <text x="700" y="905" text-anchor="middle" font-size="12" fill="#ad1457">Multi-Scale Object Detection</text>
+  <text x="700" y="920" text-anchor="middle" font-size="11" fill="#ad1457">Bounding Boxes + Object Classes + Confidence Scores</text>
+  <text x="700" y="935" text-anchor="middle" font-size="10" fill="#ad1457">Enhanced by DINO3 Global Context Understanding at P4 Level</text>
+  
+  <!-- Model Comparison -->
+  <rect x="50" y="960" width="600" height="35" rx="5" fill="#f5f5f5" stroke="#424242" stroke-width="1"/>
+  <text x="70" y="980" font-size="11" font-weight="bold" fill="#1976d2">🆕 DINO3: 99.4M params, YOLOv3-style backbone</text>
+  <text x="350" y="980" font-size="11" font-weight="bold" fill="#388e3c">🔬 DINO2: 95.8M params, Standard YOLOv13</text>
+  
+  <!-- Flow Arrows -->
+  <!-- Input to Backbone -->
+  <line x1="170" y1="95" x2="250" y2="150" stroke="#424242" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <!-- Backbone to DINO3 -->
+  <line x1="890" y1="207" x2="1000" y2="207" stroke="#ff8f00" stroke-width="4" marker-end="url(#dinoArrow)"/>
+  <text x="940" y="200" font-size="9" fill="#e65100">512ch features</text>
+  
+  <!-- DINO3 back to Backbone -->
+  <line x1="1000" y1="240" x2="890" y2="240" stroke="#ff8f00" stroke-width="3" stroke-dasharray="5,5" marker-end="url(#dinoArrow)"/>
+  <text x="940" y="255" font-size="9" fill="#e65100">Enhanced 512ch</text>
+  
+  <!-- Backbone to Head -->
+  <line x1="565" y1="330" x2="565" y2="480" stroke="#ff8f00" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="570" y="400" font-size="9" fill="#e65100">P3</text>
+  
+  <line x1="840" y1="330" x2="575" y2="480" stroke="#ff8f00" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="700" y="400" font-size="9" fill="#e65100">P4 DINO3</text>
+  
+  <line x1="195" y1="330" x2="220" y2="480" stroke="#424242" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="150" y="400" font-size="9" fill="#424242">P5</text>
+  
+  <!-- Head to Output -->
+  <line x1="700" y1="830" x2="700" y2="860" stroke="#424242" stroke-width="3" marker-end="url(#arrow)"/>
+  
+  <!-- Enhancement Indicators -->
+  <circle cx="575" cy="570" r="10" fill="#ffa000" stroke="#e65100" stroke-width="2"/>
+  <text x="575" y="577" text-anchor="middle" font-size="14" font-weight="bold" fill="white">⭐</text>
+  
+  <!-- Legend -->
+  <rect x="700" y="960" width="650" height="35" rx="5" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+  <text x="720" y="980" font-size="10" fill="#495057">⭐ DINO3 Enhanced</text>
+  <rect x="820" y="970" width="12" height="12" fill="#e8eaf6"/>
+  <text x="840" y="980" font-size="10" fill="#495057">Standard CNN</text>
+  <rect x="920" y="970" width="12" height="12" fill="#c8e6c8"/>
+  <text x="940" y="980" font-size="10" fill="#495057">Detection Head</text>
+  <rect x="1040" y="970" width="12" height="12" fill="#ffecb3"/>
+  <text x="1060" y="980" font-size="10" fill="#495057">DINO Enhanced</text>
+  <line x1="1180" y1="976" x2="1200" y2="976" stroke="#ff8f00" stroke-width="3"/>
+  <text x="1210" y="980" font-size="10" fill="#495057">Enhancement Flow</text>
+</svg>

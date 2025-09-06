@@ -1,0 +1,125 @@
+name: 🐛 Bug Report
+description: File a bug report to help us improve YOLOv13-DINO
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! 🙏
+        
+        Please search existing issues first to avoid duplicates.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 🐛 Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe the bug...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Load model with '...'
+        2. Run training with '...'
+        3. See error
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ✅ Expected Behavior
+      description: What you expected to happen
+      placeholder: Describe expected behavior...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: ❌ Actual Behavior
+      description: What actually happened
+      placeholder: Describe actual behavior...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: model
+    attributes:
+      label: 🏗️ Model Architecture
+      description: Which model architecture were you using?
+      options:
+        - yolov13 (standard)
+        - yolov13-dino2
+        - yolov13-dino3
+        - yolov13-dino3-dual
+        - yolov13-dino3-p3
+        - yolov13-dino3-multi
+        - Other (specify in description)
+    validations:
+      required: true
+
+  - type: input
+    id: dino-variant
+    attributes:
+      label: 🔬 DINO Variant
+      description: If using DINO models, which variant?
+      placeholder: e.g., dinov3_vitb16, dinov2_vitl14
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 🖥️ Environment
+      description: |
+        Please run this command and paste the output:
+        ```bash
+        python -c "import torch, ultralytics; print(f'Python: {torch.__version__}, PyTorch: {torch.__version__}, CUDA: {torch.cuda.is_available()}, Ultralytics: {ultralytics.__version__}')"
+        ```
+      placeholder: |
+        - OS: [e.g. Ubuntu 20.04, Windows 11, macOS 12.0]
+        - Python: [e.g. 3.9.12]
+        - PyTorch: [e.g. 1.13.0]
+        - CUDA: [e.g. 11.7, or "CPU only"]
+        - GPU: [e.g. RTX 3080, V100, or "CPU only"]
+        - RAM: [e.g. 16GB]
+        - GPU VRAM: [e.g. 10GB]
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📋 Error Logs
+      description: Please copy and paste any relevant log output
+      render: shell
+      placeholder: Paste error logs here...
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📎 Additional Context
+      description: Add any other context about the problem
+      placeholder: Additional context...
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: ✅ Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues for duplicates
+          required: true
+        - label: I have provided all required information
+          required: true
+        - label: I am using the latest version of the code
+          required: true

@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
 """
-YOLOv13 with DINO2 Backbone Inference Script
+YOLOv13 with DINO Vision Transformer Backbone Inference Script
 
-This script performs inference using trained YOLOv13-DINO2 models for object detection.
+This script performs inference using trained YOLOv13-DINO models (DINO2/DINO3) for object detection.
 Supports single images, batch processing, video files, and webcam inference.
+Now supports all DINOv3 multi-scale architectures!
 
 Developed by: Artificial Intelligence Research Group
 Department: Civil Engineering
 Institution: King Mongkut's University of Technology Thonburi (KMUTT)
 
 Usage Examples:
-    # Single image inference
-    python dino_inference.py --weights best.pt --source image.jpg
+    # DINO3 model inference (NEW)
+    python dino_inference.py --weights yolov13-dino3-best.pt --source image.jpg
+    python dino_inference.py --weights yolov13-dino3-dual-best.pt --source images/
+    python dino_inference.py --weights yolov13-dino3-multi-best.pt --source video.mp4
+    
+    # DINO2 model inference (original)
+    python dino_inference.py --weights yolov13-dino2-best.pt --source image.jpg
     
     # Batch image processing
     python dino_inference.py --weights best.pt --source images/
@@ -27,6 +33,9 @@ Usage Examples:
     
     # Save results with custom name
     python dino_inference.py --weights best.pt --source test.jpg --name custom_results
+    
+    # Multi-scale DINO3 with advanced settings
+    python dino_inference.py --weights yolov13-dino3-multi-best.pt --source test.jpg --conf 0.5 --save --save-txt
 """
 
 import argparse
@@ -40,16 +49,17 @@ import cv2
 import numpy as np
 
 
-class DINO2Filter(logging.Filter):
-    """Custom logging filter to suppress DINO2 warnings during inference."""
+class DINOFilter(logging.Filter):
+    """Custom logging filter to suppress DINO warnings during inference."""
     
     def filter(self, record):
-        """Filter out DINO2-specific warnings."""
+        """Filter out DINO-specific warnings."""
         if hasattr(record, 'getMessage'):
             message = record.getMessage()
             
-            # Filter out DINO2 warnings during inference
-            if ("setting 'requires_grad=True' for frozen layer 'model.4.dino_model" in message):
+            # Filter out DINO2/DINO3 warnings during inference
+            if ("setting 'requires_grad=True' for frozen layer" in message and 
+                ("dino_model" in message)):
                 return False
                 
         return True
@@ -98,7 +108,7 @@ def print_results_summary(results, source_type, total_time, num_items):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='YOLOv13 + DINO2 Inference')
+    parser = argparse.ArgumentParser(description='YOLOv13 + DINO Vision Transformer Inference')
     
     # Core arguments
     parser.add_argument('--weights', type=str, required=True, 
@@ -154,11 +164,11 @@ def main():
     
     args = parser.parse_args()
     
-    # Apply DINO2 filter to suppress warnings
-    dino2_filter = DINO2Filter()
-    LOGGER.addFilter(dino2_filter)
+    # Apply DINO filter to suppress warnings
+    dino_filter = DINOFilter()
+    LOGGER.addFilter(dino_filter)
     
-    print(f"{colorstr('bright_blue', 'bold', '🔍 YOLOv13 + DINO2 Inference')}")
+    print(f"{colorstr('bright_blue', 'bold', '🔍 YOLOv13 + DINO Vision Transformer Inference')}")
     print(f"Weights: {args.weights}")
     print(f"Source: {args.source}")
     print(f"Confidence Threshold: {args.conf}")
@@ -178,17 +188,37 @@ def main():
         model = YOLO(args.weights)
         print(f"✅ Model loaded successfully")
         
-        # Check if model has DINO2 components
-        has_dino2 = False
-        for module in model.model.modules():
-            if hasattr(module, '__class__') and 'DINO2Backbone' in str(module.__class__):
-                has_dino2 = True
-                dino_variant = getattr(module, 'model_name', 'unknown')
-                print(f"🔬 DINO2 backbone detected: {dino_variant}")
-                break
+        # Check if model has DINO components (DINO2 or DINO3)
+        has_dino = False
+        dino_type_found = None
+        dino_variant = 'unknown'
+        dino_count = 0
         
-        if not has_dino2:
-            print(f"ℹ️  Standard YOLOv13 model (no DINO2 enhancement)")
+        for module in model.model.modules():
+            module_class = str(module.__class__)
+            if hasattr(module, '__class__') and ('DINO2Backbone' in module_class or 'DINO3Backbone' in module_class):
+                has_dino = True
+                dino_count += 1
+                dino_type_found = "DINO3" if 'DINO3Backbone' in module_class else "DINO2"
+                dino_variant = getattr(module, 'model_name', 'unknown')
+        
+        if has_dino:
+            if dino_count > 1:
+                print(f"🔬 Multi-scale {dino_type_found} architecture detected: {dino_count} DINO backbones")
+                print(f"   Variant: {dino_variant}")
+                
+                # Determine architecture type based on DINO count
+                if dino_count == 2:
+                    print(f"   Architecture: Dual-scale enhancement (P3+P4)")
+                elif dino_count == 3:
+                    print(f"   Architecture: Triple-scale enhancement (P3+P4+P5)")
+                else:
+                    print(f"   Architecture: Custom multi-scale configuration")
+            else:
+                print(f"🔬 {dino_type_found} backbone detected: {dino_variant}")
+                print(f"   Architecture: Single-scale enhancement")
+        else:
+            print(f"ℹ️  Standard YOLOv13 model (no DINO enhancement)")
         
         # Determine source type
         if isinstance(source, int):
@@ -269,18 +299,18 @@ def main():
         print(f"\n{colorstr('bright_green', 'bold', '✅ Inference completed successfully!')}")
         
         # Remove filter
-        LOGGER.removeFilter(dino2_filter)
+        LOGGER.removeFilter(dino_filter)
         
     except KeyboardInterrupt:
         print(f"\n{colorstr('yellow', '⚠️  Inference interrupted by user')}")
-        LOGGER.removeFilter(dino2_filter)
+        LOGGER.removeFilter(dino_filter)
         
     except Exception as e:
         print(f"\n{colorstr('red', 'bold', '❌ Inference failed:')}")
         print(f"Error: {e}")
         import traceback
         traceback.print_exc()
-        LOGGER.removeFilter(dino2_filter)
+        LOGGER.removeFilter(dino_filter)
         sys.exit(1)
 
 

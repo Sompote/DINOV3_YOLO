@@ -62,7 +62,8 @@ from .block import (
     DownsampleConv,
     FullPAD_Tunnel,
     DSC3k2,
-    DINO2Backbone
+    DINO2Backbone,
+    DINO3Backbone
 )
 from .conv import (
     CBAM,
@@ -173,5 +174,6 @@ __all__ = (
     "FullPAD_Tunnel",
     "DSC3k2",
     "DSConv",
-    "DINO2Backbone"
+    "DINO2Backbone",
+    "DINO3Backbone"
 )
