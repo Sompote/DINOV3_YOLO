@@ -40,6 +40,16 @@ Usage:
     python train_dino2.py --data data.yaml --model yolov13-dino3-p3      # P3 focused (small objects)
     python train_dino2.py --data data.yaml --model yolov13-dino3-multi   # All scales with optimized variants
     
+    # Train YOLOv13 + DINO3 Satellite Imagery variants (LATEST - for satellite/aerial imagery)
+    python train_dino2.py --data satellite.yaml --model yolov13-dino3 --dino-variant dinov3_vits16_sat    # Fast satellite
+    python train_dino2.py --data satellite.yaml --model yolov13-dino3 --dino-variant dinov3_vitb16_sat    # Balanced satellite  
+    python train_dino2.py --data satellite.yaml --model yolov13-dino3 --dino-variant dinov3_vitl16_sat    # High accuracy satellite
+    python train_dino2.py --data satellite.yaml --model yolov13-dino3 --dino-variant dinov3_convnext_large_sat  # ConvNeXt satellite
+    
+    # Train YOLOv13 + DINO3 Latest Model variants (7B parameters for research)
+    python train_dino2.py --data research.yaml --model yolov13-dino3-multi --dino-variant dinov3_vit7b16  # 7B parameter model
+    python train_dino2.py --data research.yaml --model yolov13-dino3-multi --dino-variant dinov3_vith16_plus  # Huge+ model
+    
     # Train YOLOv13 + DINO2 combinations (original)
     python train_dino2.py --data data.yaml --model yolov13-dino2-working --size n --dino-variant dinov2_vits14  # Fast
     python train_dino2.py --data data.yaml --model yolov13-dino2-working --size x --dino-variant dinov2_vitl14  # Best accuracy
@@ -99,11 +109,14 @@ def main():
                        choices=[
                            # DINO2 variants
                            'dinov2_vits14', 'dinov2_vitb14', 'dinov2_vitl14', 'dinov2_vitg14',
-                           # DINOv3 ViT variants (official naming)
+                           # DINOv3 ViT variants (official naming from Facebook Research)
                            'dinov3_vits16', 'dinov3_vits16_plus', 'dinov3_vitb16', 'dinov3_vitl16', 
                            'dinov3_vith16_plus', 'dinov3_vit7b16',
                            # DINOv3 ConvNeXt variants
                            'dinov3_convnext_tiny', 'dinov3_convnext_small', 'dinov3_convnext_base', 'dinov3_convnext_large',
+                           # DINOv3 Satellite imagery variants (NEW)
+                           'dinov3_vits16_sat', 'dinov3_vitb16_sat', 'dinov3_vitl16_sat',
+                           'dinov3_convnext_small_sat', 'dinov3_convnext_base_sat', 'dinov3_convnext_large_sat',
                            # Legacy DINOv3 naming (backward compatibility)
                            'dinov3_vits14', 'dinov3_vitb14', 'dinov3_vitl14', 'dinov3_vitg14'
                        ],
@@ -211,12 +224,12 @@ def main():
         print(f"   • Training completed successfully ✅")
         
         # Remove filter to restore normal logging
-        LOGGER.removeFilter(dino2_filter)
+        LOGGER.removeFilter(dino_filter)
         
     except Exception as e:
         print(f"❌ Training failed: {e}")
         # Remove filter even on failure
-        LOGGER.removeFilter(dino2_filter)
+        LOGGER.removeFilter(dino_filter)
         return
 
 

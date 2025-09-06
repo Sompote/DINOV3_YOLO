@@ -85,11 +85,14 @@ def main():
                        choices=[
                            # DINO2 variants
                            'dinov2_vits14', 'dinov2_vitb14', 'dinov2_vitl14', 'dinov2_vitg14',
-                           # DINOv3 ViT variants (official naming)
+                           # DINOv3 ViT variants (official naming from Facebook Research)
                            'dinov3_vits16', 'dinov3_vits16_plus', 'dinov3_vitb16', 'dinov3_vitl16', 
                            'dinov3_vith16_plus', 'dinov3_vit7b16',
                            # DINOv3 ConvNeXt variants
                            'dinov3_convnext_tiny', 'dinov3_convnext_small', 'dinov3_convnext_base', 'dinov3_convnext_large',
+                           # DINOv3 Satellite imagery variants (NEW)
+                           'dinov3_vits16_sat', 'dinov3_vitb16_sat', 'dinov3_vitl16_sat',
+                           'dinov3_convnext_small_sat', 'dinov3_convnext_base_sat', 'dinov3_convnext_large_sat',
                            # Legacy DINOv3 naming (backward compatibility)
                            'dinov3_vits14', 'dinov3_vitb14', 'dinov3_vitl14', 'dinov3_vitg14'
                        ],

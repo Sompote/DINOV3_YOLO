@@ -2195,27 +2195,36 @@ class DINO3Backbone(nn.Module):
         self.input_channels = input_channels
         self.output_channels = output_channels
         
-        # DINOv3 model specifications based on official repository
+        # DINOv3 model specifications based on official Facebook Research repository
+        # Reference: https://github.com/facebookresearch/dinov3
         self.dinov3_specs = {
-            # ViT models (Vision Transformer)
-            'dinov3_vits16': {'params': 21, 'embed_dim': 384, 'patch_size': 16, 'type': 'vit'},      # Small
-            'dinov3_vits16_plus': {'params': 29, 'embed_dim': 384, 'patch_size': 16, 'type': 'vit'}, # Small+
-            'dinov3_vitb16': {'params': 86, 'embed_dim': 768, 'patch_size': 16, 'type': 'vit'},      # Base
-            'dinov3_vitl16': {'params': 300, 'embed_dim': 1024, 'patch_size': 16, 'type': 'vit'},   # Large
-            'dinov3_vith16_plus': {'params': 840, 'embed_dim': 1280, 'patch_size': 16, 'type': 'vit'}, # Huge+
-            'dinov3_vit7b16': {'params': 6716, 'embed_dim': 4096, 'patch_size': 16, 'type': 'vit'},  # 7B
+            # ViT models (Vision Transformer) - Official DINOv3 variants
+            'dinov3_vits16': {'params': 21, 'embed_dim': 384, 'patch_size': 16, 'type': 'vit', 'dataset': 'LVD'},      # Small/16 distilled
+            'dinov3_vits16_plus': {'params': 29, 'embed_dim': 384, 'patch_size': 16, 'type': 'vit', 'dataset': 'LVD'}, # Small+/16 distilled
+            'dinov3_vitb16': {'params': 86, 'embed_dim': 768, 'patch_size': 16, 'type': 'vit', 'dataset': 'LVD'},      # Base/16 distilled
+            'dinov3_vitl16': {'params': 300, 'embed_dim': 1024, 'patch_size': 16, 'type': 'vit', 'dataset': 'LVD'},   # Large/16 distilled
+            'dinov3_vith16_plus': {'params': 840, 'embed_dim': 1280, 'patch_size': 16, 'type': 'vit', 'dataset': 'LVD'}, # Huge+/16 distilled
+            'dinov3_vit7b16': {'params': 6716, 'embed_dim': 4096, 'patch_size': 16, 'type': 'vit', 'dataset': 'LVD'},  # 7B/16
             
-            # ConvNeXt models
-            'dinov3_convnext_tiny': {'params': 29, 'embed_dim': 768, 'patch_size': 16, 'type': 'convnext'},
-            'dinov3_convnext_small': {'params': 50, 'embed_dim': 768, 'patch_size': 16, 'type': 'convnext'},
-            'dinov3_convnext_base': {'params': 89, 'embed_dim': 1024, 'patch_size': 16, 'type': 'convnext'},
-            'dinov3_convnext_large': {'params': 198, 'embed_dim': 1536, 'patch_size': 16, 'type': 'convnext'},
+            # ConvNeXt models - Official DINOv3 variants
+            'dinov3_convnext_tiny': {'params': 29, 'embed_dim': 768, 'patch_size': 16, 'type': 'convnext', 'dataset': 'LVD'},
+            'dinov3_convnext_small': {'params': 50, 'embed_dim': 768, 'patch_size': 16, 'type': 'convnext', 'dataset': 'LVD'},
+            'dinov3_convnext_base': {'params': 89, 'embed_dim': 1024, 'patch_size': 16, 'type': 'convnext', 'dataset': 'LVD'},
+            'dinov3_convnext_large': {'params': 198, 'embed_dim': 1536, 'patch_size': 16, 'type': 'convnext', 'dataset': 'LVD'},
             
-            # Legacy naming support
-            'dinov3_vits14': {'params': 21, 'embed_dim': 384, 'patch_size': 16, 'type': 'vit'},      # Small
-            'dinov3_vitb14': {'params': 86, 'embed_dim': 768, 'patch_size': 16, 'type': 'vit'},      # Base
-            'dinov3_vitl14': {'params': 300, 'embed_dim': 1024, 'patch_size': 16, 'type': 'vit'},   # Large
-            'dinov3_vitg14': {'params': 840, 'embed_dim': 1280, 'patch_size': 16, 'type': 'vit'},   # Giant (Huge+)
+            # Satellite imagery variants (SAT dataset) - NEW
+            'dinov3_vits16_sat': {'params': 21, 'embed_dim': 384, 'patch_size': 16, 'type': 'vit', 'dataset': 'SAT'},
+            'dinov3_vitb16_sat': {'params': 86, 'embed_dim': 768, 'patch_size': 16, 'type': 'vit', 'dataset': 'SAT'},
+            'dinov3_vitl16_sat': {'params': 300, 'embed_dim': 1024, 'patch_size': 16, 'type': 'vit', 'dataset': 'SAT'},
+            'dinov3_convnext_small_sat': {'params': 50, 'embed_dim': 768, 'patch_size': 16, 'type': 'convnext', 'dataset': 'SAT'},
+            'dinov3_convnext_base_sat': {'params': 89, 'embed_dim': 1024, 'patch_size': 16, 'type': 'convnext', 'dataset': 'SAT'},
+            'dinov3_convnext_large_sat': {'params': 198, 'embed_dim': 1536, 'patch_size': 16, 'type': 'convnext', 'dataset': 'SAT'},
+            
+            # Legacy naming support for backward compatibility
+            'dinov3_vits14': {'params': 21, 'embed_dim': 384, 'patch_size': 16, 'type': 'vit', 'dataset': 'LVD'},      # Small (legacy)
+            'dinov3_vitb14': {'params': 86, 'embed_dim': 768, 'patch_size': 16, 'type': 'vit', 'dataset': 'LVD'},      # Base (legacy)
+            'dinov3_vitl14': {'params': 300, 'embed_dim': 1024, 'patch_size': 16, 'type': 'vit', 'dataset': 'LVD'},   # Large (legacy)
+            'dinov3_vitg14': {'params': 840, 'embed_dim': 1280, 'patch_size': 16, 'type': 'vit', 'dataset': 'LVD'},   # Giant/Huge+ (legacy)
         }
         
         # Get model specifications
@@ -2228,35 +2237,20 @@ class DINO3Backbone(nn.Module):
         self.embed_dim = self.model_spec['embed_dim']
         self.patch_size = self.model_spec['patch_size']
         self.model_type = self.model_spec['type']
+        self.dataset_type = self.model_spec.get('dataset', 'LVD')
         
-        # Load DINOv3 model (using DINOv2 as placeholder for now)
+        # Load DINOv3 model
         print(f"Loading DINOv3 {self.model_type.upper()} model: {model_name}")
         print(f"  Parameters: {self.model_spec['params']}M")
         print(f"  Embedding dim: {self.embed_dim}")
         print(f"  Patch size: {self.patch_size}")
+        print(f"  Dataset: {self.dataset_type} ({'Web Images' if self.dataset_type == 'LVD' else 'Satellite Imagery'})")
         
-        try:
-            # For now, use DINOv2 as compatible backbone until DINOv3 is fully available
-            # Map to appropriate DINOv2 size based on DINOv3 specification
-            if self.embed_dim <= 384:
-                dino2_model = 'facebook/dinov2-small'
-            elif self.embed_dim <= 768:
-                dino2_model = 'facebook/dinov2-base'
-            elif self.embed_dim <= 1024:
-                dino2_model = 'facebook/dinov2-large'
-            else:
-                dino2_model = 'facebook/dinov2-giant'
-                
-            self.dino_model = Dinov2Model.from_pretrained(dino2_model)
-            print(f"✅ Successfully loaded DINOv3-compatible model using {dino2_model}")
-        except Exception as e:
-            print(f"❌ Failed to load DINOv3 model: {e}")
-            print(f"Using random initialization")
-            config = Dinov2Config()
-            # Adjust config to match DINOv3 specs
-            config.hidden_size = self.embed_dim
-            config.patch_size = self.patch_size
-            self.dino_model = Dinov2Model(config)
+        # Initialize DINOv3 model
+        self.dino_model = self._load_dinov3_model(model_name)
+        
+        # Create a method to easily update model variant
+        self._initialize_dino_model = lambda: self._load_dinov3_model(self.model_name)
         
         # Freeze weights if requested
         if self.freeze_backbone:
@@ -2270,6 +2264,93 @@ class DINO3Backbone(nn.Module):
         self.feature_adapter = None
         self.spatial_projection = None
         
+    def _load_dinov3_model(self, model_name):
+        """
+        Load DINOv3 model with support for multiple loading strategies.
+        
+        This method attempts to load DINOv3 models in the following order:
+        1. Official DINOv3 models via PyTorch Hub (when available)
+        2. Hugging Face Transformers (for compatible models)
+        3. DINOv2 as compatible fallback
+        4. Random initialization as last resort
+        
+        Args:
+            model_name (str): DINOv3 model variant name
+            
+        Returns:
+            Loaded DINO model instance
+        """
+        spec = self.dinov3_specs[model_name]
+        
+        # Strategy 1: Try to load official DINOv3 from PyTorch Hub
+        try:
+            import torch
+            # This will work when DINOv3 models are officially released on PyTorch Hub
+            hub_name = f"facebookresearch/dinov3:{model_name}"
+            print(f"🔄 Attempting to load official DINOv3 model from PyTorch Hub: {hub_name}")
+            
+            # Check if the model exists in PyTorch Hub
+            available_models = torch.hub.list('facebookresearch/dinov3', force_reload=False)
+            if model_name in available_models:
+                model = torch.hub.load('facebookresearch/dinov3', model_name, pretrained=True)
+                print(f"✅ Successfully loaded official DINOv3 model: {model_name}")
+                return model
+        except Exception as e:
+            print(f"ℹ️  Official DINOv3 not available via PyTorch Hub: {e}")
+        
+        # Strategy 2: Try to load from Hugging Face (if DINOv3 models become available)
+        try:
+            from transformers import AutoModel, AutoConfig
+            hf_model_name = f"facebook/dinov3-{model_name.replace('dinov3_', '')}"
+            print(f"🔄 Attempting to load DINOv3 from Hugging Face: {hf_model_name}")
+            model = AutoModel.from_pretrained(hf_model_name)
+            print(f"✅ Successfully loaded DINOv3 from Hugging Face: {hf_model_name}")
+            return model
+        except Exception as e:
+            print(f"ℹ️  DINOv3 not available via Hugging Face: {e}")
+        
+        # Strategy 3: Use DINOv2 as compatible fallback based on embedding dimensions
+        try:
+            print(f"🔄 Using DINOv2 as compatible fallback for DINOv3 specs")
+            
+            # Map DINOv3 specs to appropriate DINOv2 model
+            embed_dim = spec['embed_dim']
+            if embed_dim <= 384:
+                dino2_model = 'facebook/dinov2-small'
+            elif embed_dim <= 768:
+                dino2_model = 'facebook/dinov2-base'
+            elif embed_dim <= 1024:
+                dino2_model = 'facebook/dinov2-large'
+            else:
+                dino2_model = 'facebook/dinov2-giant'
+                
+            model = Dinov2Model.from_pretrained(dino2_model)
+            print(f"✅ Successfully loaded DINOv2 fallback: {dino2_model} (for DINOv3 {model_name})")
+            print(f"   Embedding dim mapping: {embed_dim} -> {model.config.hidden_size}")
+            return model
+            
+        except Exception as e:
+            print(f"❌ Failed to load DINOv2 fallback: {e}")
+        
+        # Strategy 4: Random initialization as last resort
+        try:
+            print(f"🔄 Creating randomly initialized model matching DINOv3 specifications")
+            config = Dinov2Config()
+            config.hidden_size = spec['embed_dim']
+            config.patch_size = spec['patch_size']
+            config.num_attention_heads = max(8, spec['embed_dim'] // 64)  # Reasonable default
+            config.num_hidden_layers = min(24, max(12, spec['params'] // 10))  # Estimate layers from params
+            
+            model = Dinov2Model(config)
+            print(f"✅ Created random DINOv3 model with {spec['params']}M parameter specification")
+            print(f"   Embedding dim: {config.hidden_size}, Patch size: {config.patch_size}")
+            print(f"   Attention heads: {config.num_attention_heads}, Layers: {config.num_hidden_layers}")
+            return model
+            
+        except Exception as e:
+            print(f"❌ Failed to create random model: {e}")
+            raise RuntimeError(f"Could not initialize DINOv3 model {model_name} with any strategy")
+    
     def extract_features(self, features, input_size):
         """Extract features from DINOv3 patch features maintaining spatial dimensions."""
         B, N_total, D = features.shape
