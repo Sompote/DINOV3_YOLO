@@ -339,27 +339,6 @@ graph TD
 | **Dual-scale** | P3+P4 | 3-14GB | ~2x | 🎯 **Medium** | Mixed objects |
 | **Multi-scale** | P3+P4+P5 | ~20GB | ~5x | 🏆 **Research** | Maximum accuracy |
 
-</div>
-
-## 🎯 Benchmarks
-
-### 📊 **COCO Dataset Results**
-
-<div align="center">
-
-| Model Class | Model | DINOv3 Backbone | mAP@0.5 | mAP@0.5:0.95 | Speed (ms) | Memory | Improvement |
-|:------------|:------|:----------------|:--------|:-------------|:-----------|:-------|:------------|
-| **Nano** | YOLOv13-n | None | 58.2% | 35.1% | 8.5 | 2GB | baseline |
-| | YOLOv13-DINO3-n | **ViT-S/16** | **62.8%** | **38.4%** | 10.2 | 3GB | **+4.6% / +3.3%** ↗️ |
-| **Base** | YOLOv13 | None | 65.2% | 42.8% | 12.5 | 4GB | baseline |
-| | YOLOv13-DINO3 | **ViT-B/16** | **70.4%** | **47.1%** | 15.8 | 6GB | **+5.2% / +4.3%** ↗️ |
-| **🛰️ Satellite** | YOLOv13-DINO3-SAT | **ViT-B/16-SAT** | **72.1%** | **48.9%** | 16.2 | 6GB | **+6.9% / +6.1%** ↗️ |
-| **🧠 Hybrid** | YOLOv13-DINO3-ConvNeXt | **ConvNeXt-Base** | **71.8%** | **48.4%** | 18.1 | 7GB | **+6.6% / +5.6%** ↗️ |
-| **Dual** | YOLOv13-DINO3-Dual | **ViT-L/16** | **74.2%** | **50.8%** | 28.4 | 12GB | **+9.0% / +8.0%** ↗️ |
-| **🏆 Research** | YOLOv13-DINO3-Multi | **ViT-H+/16** | **76.8%** | **54.1%** | 45.3 | 24GB | **+11.6% / +11.3%** ↗️ |
-| **🧠 Ultimate** | YOLOv13-DINO3-Multi | **ViT-7B/16** | **79.2%** | **56.8%** | 120.7 | 40GB | **+21.0% / +21.7%** ↗️ |
-
-</div>
 
 ### 🔍 **Small Object Detection Performance**
 
