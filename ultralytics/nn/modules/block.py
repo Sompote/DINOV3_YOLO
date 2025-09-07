@@ -2250,7 +2250,6 @@ class DINO3Backbone(nn.Module):
         self.dino_model = self._load_dinov3_model(model_name)
         
         # Create a method to easily update model variant
-        self._initialize_dino_model = lambda: self._load_dinov3_model(self.model_name)
         
         # Freeze weights if requested
         if self.freeze_backbone:
@@ -2263,6 +2262,10 @@ class DINO3Backbone(nn.Module):
         self.fusion_layer = None
         self.feature_adapter = None
         self.spatial_projection = None
+    
+    def _initialize_dino_model(self):
+        """Initialize DINO model with current model_name."""
+        self.dino_model = self._load_dinov3_model(self.model_name)
         
     def _load_dinov3_model(self, model_name):
         """
