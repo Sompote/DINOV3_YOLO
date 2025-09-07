@@ -10,6 +10,7 @@ Key features:
 - Clean training output without freeze warnings
 - Full compatibility with Ultralytics training pipeline
 - **NEW**: Support for resuming from previous trained weights
+- **NEW**: Systematic architecture support with 125+ model combinations
 
 Usage:
     # Resume from previous DINO2/DINO3 weights
@@ -18,12 +19,13 @@ Usage:
     # Resume with different settings
     python train_dino2_resume.py --data data.yaml --weights runs/detect/yolov13-dino3/weights/best.pt --epochs 50
     
-    # Start fresh DINO3 training (NEW)
-    python train_dino2_resume.py --data data.yaml --model yolov13-dino3 --dino-variant dinov3_vitb16 --freeze-dino2
-    python train_dino2_resume.py --data data.yaml --model yolov13-dino3-dual --dino-variant dinov3_vitl16
-    python train_dino2_resume.py --data data.yaml --model yolov13-dino3-multi --dino-variant dinov3_vith16_plus
+    # Start fresh SYSTEMATIC training (RECOMMENDED)
+    python train_dino2_resume.py --data data.yaml --model yolov13s-dino3-vitb16-single --freeze-dino2
+    python train_dino2_resume.py --data data.yaml --model yolov13l-dino3-vitl16-dual --dino-variant dinov3_vitl16
+    python train_dino2_resume.py --data data.yaml --model yolov13m-dino3-vitb16_sat-single --dino-variant dinov3_vitb16_sat
     
-    # Start fresh DINO2 training (original)
+    # Legacy model support (still works)
+    python train_dino2_resume.py --data data.yaml --model yolov13-dino3 --dino-variant dinov3_vitb16 --freeze-dino2
     python train_dino2_resume.py --data data.yaml --model yolov13-dino2-working --size s --dino-variant dinov2_vits14
 """
 
@@ -68,16 +70,11 @@ def main():
     
     # Model variant selection (only used when --weights is not provided)
     parser.add_argument('--model', type=str, default='yolov13-dino2-working', 
-                       choices=['yolov13', 'yolov13n', 'yolov13s', 'yolov13l', 'yolov13x',
-                               'yolov13-dino2', 'yolov13-dino2-simple', 
-                               'yolov13-dino2-working', 'yolov13-dino2-fixed',
-                               # DINO3 single-scale variants
-                               'yolov13-dino3', 'yolov13-dino3-n', 'yolov13-dino3-s', 'yolov13-dino3-l', 'yolov13-dino3-x',
-                               # DINO3 dual-scale variants
-                               'yolov13-dino3-dual', 'yolov13-dino3-dual-n', 'yolov13-dino3-dual-s', 'yolov13-dino3-dual-l', 'yolov13-dino3-dual-x',
-                               # DINO3 other variants
-                               'yolov13-dino3-p3', 'yolov13-dino3-multi'],
-                       help='YOLOv13 model variant (ignored if --weights is provided)')
+                       help='YOLOv13 model variant (ignored if --weights is provided). Supports both legacy and systematic naming:\n'
+                            'Base: yolov13, yolov13n, yolov13s, yolov13l, yolov13x\n'
+                            'Legacy DINO2: yolov13-dino2-working, yolov13-dino2-working-s, etc.\n'
+                            'Legacy DINO3: yolov13-dino3, yolov13-dino3-s, yolov13-dino3-dual, etc.\n'
+                            'Systematic: yolov13s-dino3-vitb16-single, yolov13l-dino3-vitl16-dual, etc.')
     parser.add_argument('--size', type=str, default=None,
                        choices=['n', 's', 'l', 'x'],
                        help='YOLOv13 model size (ignored if --weights is provided)')
@@ -126,6 +123,8 @@ def main():
         else:
             # Original behavior - create new model
             final_model = args.model
+            
+            # Handle legacy size appending for backward compatibility
             if args.size and not final_model.endswith(args.size):
                 base_models = ['yolov13', 'yolov13-dino2', 'yolov13-dino2-simple', 
                               'yolov13-dino2-working', 'yolov13-dino2-fixed', 
@@ -137,7 +136,17 @@ def main():
                         final_model = f'{final_model}-{args.size}'
             
             print(f"🆕 Creating new model: {final_model}")
+            
+            # Support both legacy and systematic model file paths
             model_path = f'ultralytics/cfg/models/v13/{final_model}.yaml'
+            
+            # Check if model file exists
+            if not Path(model_path).exists():
+                print(f"⚠️  Model file not found: {model_path}")
+                print(f"💡 Available systematic models follow the pattern: yolov13{{size}}-dino{{version}}-{{variant}}-{{integration}}.yaml")
+                print(f"   Examples: yolov13s-dino3-vitb16-single.yaml, yolov13l-dino3-vitl16-dual.yaml")
+                raise FileNotFoundError(f"Model configuration not found: {model_path}")
+            
             model = YOLO(model_path)
         
         dino_type = "DINO3" if args.dino_variant.startswith('dinov3') else "DINO2"

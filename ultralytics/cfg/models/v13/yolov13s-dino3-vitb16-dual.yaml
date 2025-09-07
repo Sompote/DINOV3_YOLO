@@ -1,0 +1,58 @@
+# YOLOv13s with DINO3 vitb16 Dual-scale Integration
+# Systematic naming: yolov13{size}-dino{version}-{variant}-{integration}
+
+nc: 80 # number of classes
+scales: # model compound scaling constants
+  # [depth, width, max_channels]
+  s: [0.50, 0.50, 1024]   # Small
+
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, Conv,  [64, 3, 2]] # 0-P1/2
+  - [-1, 1, Conv,  [128, 3, 2, 1, 2]] # 1-P2/4
+  - [-1, 2, DSC3k2,  [256, False, 0.25]]
+  - [-1, 1, Conv,  [256, 3, 2, 1, 4]] # 3-P3/8
+  - [-1, 2, DSC3k2,  [512, False, 0.25]]
+  
+  # DINO3 integration at P3 level (dual-scale: first integration point)
+  - [-1, 1, DINO3Backbone, ['dinov3_vitb16', True, 256]]  # 5: DINO enhanced P3 features
+  
+  - [-1, 1, DSConv,  [512, 3, 2]] # 6-P4/16
+  - [-1, 4, A2C2f, [512, True, 4]]
+  
+  # DINO3 integration at P4 level (dual-scale: second integration point)
+  - [-1, 1, DINO3Backbone, ['dinov3_vitb16', True, 512]]  # 8: DINO enhanced P4 features
+  
+  - [-1, 1, DSConv,  [1024, 3, 2]] # 9-P5/32
+  - [-1, 4, A2C2f, [1024, True, 1]] # 10
+
+head:
+  - [[5, 8, 10], 2, HyperACE, [512, 8, True, True, 0.5, 1, "both"]]
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [ 11, 1, DownsampleConv, []]
+  - [[8, 11], 1, FullPAD_Tunnel, []]  #14     
+  - [[5, 12], 1, FullPAD_Tunnel, []]  #15    
+  - [[10, 13], 1, FullPAD_Tunnel, []] #16 
+  
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 14], 1, Concat, [1]] # cat DINO-enhanced P4
+  - [-1, 2, DSC3k2, [512, True]] # 19
+  - [[-1, 11], 1, FullPAD_Tunnel, []]  #20
+
+  - [19, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 15], 1, Concat, [1]] # cat DINO-enhanced P3
+  - [-1, 2, DSC3k2, [256, True]] # 23
+  - [12, 1, Conv, [256, 1, 1]]
+  - [[23, 24], 1, FullPAD_Tunnel, []]  #25
+  
+  - [-1, 1, Conv, [256, 3, 2]]
+  - [[-1, 20], 1, Concat, [1]] # cat head P4
+  - [-1, 2, DSC3k2, [512, True]] # 28
+  - [[-1, 11], 1, FullPAD_Tunnel, []]  
+
+  - [28, 1, Conv, [512, 3, 2]]
+  - [[-1, 16], 1, Concat, [1]] # cat head P5
+  - [-1, 2, DSC3k2, [1024,True]] # 32 (P5/32-large)
+  - [[-1, 13], 1, FullPAD_Tunnel, []]  
+  
+  - [[25, 29, 33], 1, Detect, [nc]] # Detect(P3, P4, P5) with dual DINO enhancement

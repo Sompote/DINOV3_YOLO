@@ -4,19 +4,25 @@ YOLOv13 with DINO Vision Transformer Backbone Inference Script
 
 This script performs inference using trained YOLOv13-DINO models (DINO2/DINO3) for object detection.
 Supports single images, batch processing, video files, and webcam inference.
-Now supports all DINOv3 multi-scale architectures!
+Now supports systematic architecture with 125+ model combinations!
 
 Developed by: Artificial Intelligence Research Group
 Department: Civil Engineering
 Institution: King Mongkut's University of Technology Thonburi (KMUTT)
 
 Usage Examples:
-    # DINO3 model inference (NEW)
+    # Systematic architecture models (RECOMMENDED)
+    python dino_inference.py --weights yolov13s-dino3-vitb16-single-best.pt --source image.jpg
+    python dino_inference.py --weights yolov13l-dino3-vitl16-dual-best.pt --source images/
+    python dino_inference.py --weights yolov13m-dino3-vitb16_sat-single-best.pt --source satellite_images/
+    python dino_inference.py --weights yolov13l-dino3-convnext_base-single-best.pt --source video.mp4
+    
+    # Legacy DINO3 model inference (still supported)
     python dino_inference.py --weights yolov13-dino3-best.pt --source image.jpg
     python dino_inference.py --weights yolov13-dino3-dual-best.pt --source images/
     python dino_inference.py --weights yolov13-dino3-multi-best.pt --source video.mp4
     
-    # DINO2 model inference (original)
+    # Legacy DINO2 model inference (still supported)
     python dino_inference.py --weights yolov13-dino2-best.pt --source image.jpg
     
     # Batch image processing
@@ -34,8 +40,8 @@ Usage Examples:
     # Save results with custom name
     python dino_inference.py --weights best.pt --source test.jpg --name custom_results
     
-    # Multi-scale DINO3 with advanced settings
-    python dino_inference.py --weights yolov13-dino3-multi-best.pt --source test.jpg --conf 0.5 --save --save-txt
+    # Satellite imagery specialist with advanced settings
+    python dino_inference.py --weights yolov13m-dino3-vitb16_sat-single-best.pt --source satellite.jpg --conf 0.6 --save --save-txt
 """
 
 import argparse
@@ -193,6 +199,7 @@ def main():
         dino_type_found = None
         dino_variant = 'unknown'
         dino_count = 0
+        model_architecture = 'Standard YOLOv13'
         
         for module in model.model.modules():
             module_class = str(module.__class__)
@@ -202,23 +209,56 @@ def main():
                 dino_type_found = "DINO3" if 'DINO3Backbone' in module_class else "DINO2"
                 dino_variant = getattr(module, 'model_name', 'unknown')
         
+        # Detect systematic model architecture from weight file name
+        weight_file = Path(args.weights).stem
+        if 'dino' in weight_file.lower():
+            # Try to parse systematic naming
+            if '-dino2-' in weight_file or '-dino3-' in weight_file:
+                parts = weight_file.split('-')
+                if len(parts) >= 4:
+                    try:
+                        yolo_size = parts[0].replace('yolov13', '')
+                        dino_version = parts[1].replace('dino', '')
+                        variant = parts[2]
+                        integration = parts[3] if len(parts) > 3 else 'unknown'
+                        
+                        model_architecture = f"Systematic YOLOv13{yolo_size.upper()}-DINO{dino_version}"
+                        if 'sat' in variant:
+                            model_architecture += f"-Satellite ({variant})"
+                        elif 'convnext' in variant:
+                            model_architecture += f"-ConvNeXt ({variant})"
+                        else:
+                            model_architecture += f"-ViT ({variant})"
+                        model_architecture += f" [{integration}-scale]"
+                    except:
+                        model_architecture = f"Legacy {dino_type_found} Enhanced"
+            else:
+                model_architecture = f"Legacy {dino_type_found} Enhanced"
+        
         if has_dino:
+            print(f"🔬 {model_architecture}")
             if dino_count > 1:
-                print(f"🔬 Multi-scale {dino_type_found} architecture detected: {dino_count} DINO backbones")
-                print(f"   Variant: {dino_variant}")
+                print(f"   Multi-scale architecture: {dino_count} DINO backbones detected")
+                print(f"   DINO variant: {dino_variant}")
                 
                 # Determine architecture type based on DINO count
                 if dino_count == 2:
-                    print(f"   Architecture: Dual-scale enhancement (P3+P4)")
+                    print(f"   Integration: Dual-scale enhancement (P3+P4)")
                 elif dino_count == 3:
-                    print(f"   Architecture: Triple-scale enhancement (P3+P4+P5)")
+                    print(f"   Integration: Triple-scale enhancement (P3+P4+P5)")
                 else:
-                    print(f"   Architecture: Custom multi-scale configuration")
+                    print(f"   Integration: Custom multi-scale configuration")
             else:
-                print(f"🔬 {dino_type_found} backbone detected: {dino_variant}")
-                print(f"   Architecture: Single-scale enhancement")
+                print(f"   DINO variant: {dino_variant}")
+                print(f"   Integration: Single-scale enhancement (P4)")
+                
+            # Special architecture detection
+            if 'sat' in dino_variant.lower():
+                print(f"   🛰️ Satellite imagery specialist detected")
+            elif 'convnext' in dino_variant.lower():
+                print(f"   🧠 ConvNeXt hybrid architecture detected")
         else:
-            print(f"ℹ️  Standard YOLOv13 model (no DINO enhancement)")
+            print(f"ℹ️  {model_architecture} (no DINO enhancement detected)")
         
         # Determine source type
         if isinstance(source, int):

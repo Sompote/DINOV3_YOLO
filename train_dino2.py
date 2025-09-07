@@ -93,14 +93,21 @@ def main():
     # Model variant selection
     parser.add_argument('--model', type=str, default='yolov13-dino2-working', 
                        choices=['yolov13', 'yolov13n', 'yolov13s', 'yolov13l', 'yolov13x',
+                               # DINO2 variants
                                'yolov13-dino2', 'yolov13-dino2-simple', 
                                'yolov13-dino2-working', 'yolov13-dino2-fixed',
+                               # DINO2 sized variants
+                               'yolov13-dino2-working-n', 'yolov13-dino2-working-s', 
+                               'yolov13-dino2-working-l', 'yolov13-dino2-working-x',
                                # DINO3 single-scale variants
-                               'yolov13-dino3', 'yolov13-dino3-n', 'yolov13-dino3-s', 'yolov13-dino3-l', 'yolov13-dino3-x',
+                               'yolov13-dino3', 'yolov13-dino3-n', 'yolov13-dino3-s', 
+                               'yolov13-dino3-l', 'yolov13-dino3-x', 'yolov13-dino3-large',
                                # DINO3 dual-scale variants
-                               'yolov13-dino3-dual', 'yolov13-dino3-dual-n', 'yolov13-dino3-dual-s', 'yolov13-dino3-dual-l', 'yolov13-dino3-dual-x',
-                               # DINO3 other variants
-                               'yolov13-dino3-p3', 'yolov13-dino3-multi'],
+                               'yolov13-dino3-dual', 'yolov13-dino3-dual-n', 'yolov13-dino3-dual-s', 
+                               'yolov13-dino3-dual-l', 'yolov13-dino3-dual-x',
+                               # DINO3 special variants
+                               'yolov13-dino3-p3', 'yolov13-dino3-multi', 'yolov13-dino3-convnext', 
+                               'yolov13-dino3-sat', 'yolov13-dino3-convnext-base'],
                        help='YOLOv13 model variant')
     parser.add_argument('--size', type=str, default=None,
                        choices=['n', 's', 'l', 'x'],

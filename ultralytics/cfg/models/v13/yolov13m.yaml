@@ -1,11 +1,10 @@
+# YOLOv13m - Medium variant for balanced performance
+# Usage: YOLO('yolov13m.yaml')
+
 nc: 80 # number of classes
-scales: # model compound scaling constants, i.e. 'model=yolov13n.yaml' will call yolov13.yaml with scale 'n'
+scales: # model compound scaling constants
   # [depth, width, max_channels]
-  n: [0.50, 0.25, 1024]   # Nano
-  s: [0.50, 0.50, 1024]   # Small
-  m: [0.75, 0.75, 768]    # Medium
-  l: [1.00, 1.00, 512]    # Large
-  x: [1.00, 1.50, 512]    # Extra Large
+  m: [0.75, 0.75, 768]   # Medium
 
 backbone:
   # [from, repeats, module, args]
