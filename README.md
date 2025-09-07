@@ -519,33 +519,6 @@ python dino_inference.py --weights yolov13-dino3-best.pt --source image.jpg --sa
 python dino_inference.py --weights yolov13-dino2-working-best.pt --source images/ --save
 ```
 
-## 📊 Benchmarks
-
-### 🎯 **Test Success Rate: 96.2%**
-
-Our systematic architecture achieves **96.2% success rate** (50 out of 52 tests passed) across all model combinations:
-
-| Test Category | Tests | Passed | Success Rate |
-|:--------------|:------|:-------|:-------------|
-| **Base YOLOv13 Models** | 10 | 8 | 80% |
-| **DINO Variant Mapping** | 9 | 9 | 100% |
-| **Model Path Generation** | 8 | 8 | 100% |
-| **Systematic Model Loading** | 3 | 2 | 67% |
-| **Legacy Compatibility** | 3 | 3 | 100% |
-| **Training Script Functions** | 4 | 4 | 100% |
-| **Architecture Consistency** | 8 | 8 | 100% |
-| **Model Combinations** | 10 | 10 | 100% |
-| **Overall** | **52** | **50** | **96.2%** |
-
-### 🎯 **COCO Dataset Performance**
-
-| Model Class | Model | mAP@0.5 | mAP@0.5:0.95 | Speed (ms) | Memory | Improvement |
-|:------------|:------|:--------|:-------------|:-----------|:-------|:------------|
-| **Baseline** | YOLOv13s | 62.8% | 40.1% | 10.2 | 3GB | — |
-| **DINO3** | YOLOv13s-DINO3-ViT-B/16 | **69.9%** | **46.4%** | 15.6 | 8GB | **+7.1% / +6.3%** ↗️ |
-| **Satellite** | YOLOv13m-DINO3-ViT-B/16-SAT | **72.4%** | **48.7%** | 17.1 | 8GB | **+9.6% / +8.6%** ↗️ |
-| **ConvNeXt** | YOLOv13l-DINO3-ConvNeXt-Base | **71.8%** | **47.9%** | 19.3 | 9GB | **+9.0% / +7.8%** ↗️ |
-| **Dual-Scale** | YOLOv13l-DINO3-ViT-L/16-Dual | **73.2%** | **49.5%** | 24.3 | 14GB | **+10.4% / +9.4%** ↗️ |
 
 ## 🏗️ Architecture
 
