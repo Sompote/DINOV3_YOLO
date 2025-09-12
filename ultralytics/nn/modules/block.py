@@ -1790,17 +1790,25 @@ class FuseModule(nn.Module):
     """
     def __init__(self, c_in, channel_adjust):
         super(FuseModule, self).__init__()
+        self.c_in = c_in
+        self.channel_adjust = channel_adjust
         self.downsample = nn.AvgPool2d(kernel_size=2)
         self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
-        if channel_adjust:
-            self.conv_out = Conv(4 * c_in, c_in, 1)
-        else:
-            self.conv_out = Conv(3 * c_in, c_in, 1)
+        self.conv_out = None  # Will be created dynamically
 
     def forward(self, x):
         x1_ds = self.downsample(x[0])
         x3_up = self.upsample(x[2])
         x_cat = torch.cat([x1_ds, x[1], x3_up], dim=1)
+        
+        # Create conv_out layer dynamically on first forward pass
+        if self.conv_out is None:
+            actual_channels = x_cat.shape[1]
+            self.conv_out = Conv(actual_channels, self.c_in, 1)
+            # Move to same device as input
+            if x_cat.is_cuda:
+                self.conv_out = self.conv_out.cuda()
+        
         out = self.conv_out(x_cat)
         return out
 
@@ -1914,8 +1922,22 @@ class FullPAD_Tunnel(nn.Module):
     def __init__(self):
         super().__init__()
         self.gate = nn.Parameter(torch.tensor(0.0))
+        self.channel_align = None  # Will be created dynamically
+        
     def forward(self, x):
-        out = x[0] + self.gate * x[1]
+        # Align channels if they differ
+        if x[0].shape[1] != x[1].shape[1]:
+            if self.channel_align is None:
+                from .conv import Conv
+                # Align x[1] to match x[0] channel count
+                self.channel_align = Conv(x[1].shape[1], x[0].shape[1], 1)
+                if x[0].is_cuda:
+                    self.channel_align = self.channel_align.cuda()
+            x1_aligned = self.channel_align(x[1])
+        else:
+            x1_aligned = x[1]
+            
+        out = x[0] + self.gate * x1_aligned
         return out
 
 
@@ -2429,7 +2451,7 @@ class DINO3Backbone(nn.Module):
             nn.Tanh()
         )
         
-        # Fusion layer
+        # Fusion layer - created dynamically based on actual input channels
         self.fusion_layer = nn.Sequential(
             nn.Conv2d(input_channels + target_channels, target_channels, 3, 1, 1),
             nn.BatchNorm2d(target_channels),
