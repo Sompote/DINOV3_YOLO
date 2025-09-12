@@ -659,6 +659,13 @@ python dino_inference.py --weights yolov13-dino2-working-best.pt --source images
 
 ## 🏗️ Architecture
 
+### 📊 **Architecture Overview**
+
+<div align="center">
+  <img src="architecture_diagram.svg" alt="YOLOv13 + DINOv3 Architecture Overview" width="100%">
+  <p><em>Complete YOLOv13 + DINOv3 Architecture - Vision Transformer Enhanced Object Detection</em></p>
+</div>
+
 ### 🎯 **Systematic Integration Strategy**
 
 ```mermaid
@@ -708,6 +715,13 @@ Input (640×640) → CNN Backbone → P3 (80×80×256) → DINO3 Enhancement →
                                Small Objects        Medium Objects
                             (High Resolution)    (Primary Integration)
 ```
+
+### 🔧 **Detailed Technical Architecture**
+
+<div align="center">
+  <img src="yolov13_dino_architecture_detailed.svg" alt="YOLOv13 + DINOv3 Detailed Technical Architecture" width="100%">
+  <p><em>Detailed Multi-Scale Architecture with P3/P4/P5 Enhancement Options and Technical Specifications</em></p>
+</div>
 
 ### 🔧 **Smart Loading System**
 
