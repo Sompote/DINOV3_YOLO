@@ -29,6 +29,10 @@ New Systematic Usage:
 
     # Satellite specialized models
     python train_yolo_dino.py --data satellite.yaml --yolo-size l --dino-version 3 --dino-variant vitb16_sat --integration dual --epochs 150
+
+    # DINO Input Layer examples (DINOv3 preprocessing before first conv layer)
+    python train_yolo_dino.py --data data.yaml --yolo-size s --dino-input --dino-variant vitb16 --epochs 100    # Base model + DINOv3 input
+    python train_yolo_dino.py --data data.yaml --yolo-size l --dino-version 3 --dino-variant vitl16 --integration dual --dino-input --epochs 100  # Full DINO3 + input
 """
 
 import argparse
@@ -177,6 +181,9 @@ def main():
     parser.add_argument('--freeze-dino', action='store_true', 
                        help='Freeze DINO backbone weights (works for both DINO2/DINO3)')
     
+    parser.add_argument('--dino-input', action='store_true',
+                       help='Add DINO layer to process input image before sending to first conv layer')
+    
     # Legacy compatibility (hidden from help)
     parser.add_argument('--legacy-model', type=str, default=None,
                        help=argparse.SUPPRESS)  # Hidden legacy option
@@ -220,6 +227,12 @@ def main():
         print(f"DINO Frozen: {args.freeze_dino}")
     else:
         print(f"DINO Enhancement: None (Base YOLOv13)")
+    
+    if args.dino_input:
+        input_variant = args.dino_variant if args.dino_version else 'vitb16'
+        print(f"DINO Input Layer: Enabled (DINOv3-{input_variant})")
+    else:
+        print(f"DINO Input Layer: Disabled")
         
     print(f"Dataset: {args.data}")
     print(f"Epochs: {args.epochs}, Batch: {args.batch_size}")
@@ -239,6 +252,66 @@ def main():
         print(f"📥 Loading model: {model_name}")
         model = YOLO(str(model_path))
         print(f"✅ Model loaded successfully")
+        
+        # Add DINO Input Layer if requested
+        if args.dino_input:
+            from ultralytics.nn.modules.block import DINOInputLayer
+            import torch.nn as nn
+            
+            # Determine variant for input layer
+            input_variant = args.dino_variant if args.dino_version else 'vitb16'
+            
+            print(f"🔧 Adding DINOv3 Input Layer: {input_variant}")
+            
+            # Create DINO input layer
+            dino_input_layer = DINOInputLayer(
+                dino_variant=input_variant,
+                freeze_dino=args.freeze_dino,
+                output_channels=3
+            )
+            
+            # Wrap the existing model to add DINO input preprocessing
+            original_model = model.model
+            
+            class DINOEnhancedModel(nn.Module):
+                def __init__(self, base_model, dino_input):
+                    super().__init__()
+                    self.dino_input = dino_input
+                    self.base_model = base_model
+                    
+                    # Copy essential attributes from base model for YOLO compatibility
+                    if hasattr(base_model, 'yaml'):
+                        self.yaml = base_model.yaml
+                    if hasattr(base_model, 'stride'):
+                        self.stride = base_model.stride
+                    if hasattr(base_model, 'names'):
+                        self.names = base_model.names
+                    if hasattr(base_model, 'nc'):
+                        self.nc = base_model.nc
+                    if hasattr(base_model, 'args'):
+                        self.args = base_model.args
+                    if hasattr(base_model, 'pt_path'):
+                        self.pt_path = base_model.pt_path
+                    if hasattr(base_model, 'task'):
+                        self.task = base_model.task
+                        
+                def forward(self, x):
+                    # Apply DINO input preprocessing
+                    enhanced_x = self.dino_input(x)
+                    # Pass through original YOLOv13 model
+                    return self.base_model(enhanced_x)
+                
+                def __getattr__(self, name):
+                    # Delegate any missing attributes to the base model
+                    if name in ['dino_input', 'base_model']:
+                        return super().__getattribute__(name)
+                    return getattr(self.base_model, name)
+            
+            # Replace model with DINO-enhanced version
+            enhanced_model = DINOEnhancedModel(original_model, dino_input_layer)
+            model.model = enhanced_model
+            
+            print(f"✅ DINOv3 Input Layer integrated successfully")
         
         # Configure DINO variant and freezing (if applicable)
         if args.dino_version:
@@ -316,6 +389,11 @@ def main():
             print(f"   • Variant: {full_dino_variant} ✅")
         else:
             print(f"   • Base YOLOv13{args.yolo_size.upper()}: LOADED ✅")
+        
+        if args.dino_input:
+            input_variant = args.dino_variant if args.dino_version else 'vitb16'
+            print(f"   • DINOv3 Input Layer: {input_variant} ✅")
+            
         print(f"   • Training completed successfully ✅")
         
         # Remove filter to restore normal logging

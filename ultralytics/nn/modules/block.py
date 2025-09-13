@@ -2537,3 +2537,144 @@ class DINO3Backbone(nn.Module):
             for param in self.dino_model.parameters():
                 param.requires_grad = False
         return self
+
+
+class DINOInputLayer(nn.Module):
+    """
+    DINOv3 Input Layer for YOLOv13 - applies DINOv3 feature extraction before first conv layer.
+    
+    This layer processes the input image through a DINOv3 backbone and then projects
+    the features back to RGB-like format that can be fed to the first convolutional layer
+    of YOLOv13 (layer 0: Conv [64, 3, 2] # 0-P1/2).
+    Uses only DINOv3 for optimal performance at the input stage.
+    
+    Args:
+        dino_variant (str): DINOv3 model variant. Supported variants:
+                           - ViT variants: 'vits16', 'vitb16', 'vitl16', 'vith16_plus', 'vit7b16'
+                           - ConvNeXt variants: 'convnext_tiny', 'convnext_small', 'convnext_base', 'convnext_large'
+                           - Satellite variants: 'vitb16_sat', 'vitl16_sat', 'convnext_base_sat'
+        freeze_dino (bool): Whether to freeze DINOv3 weights (default: True)
+        output_channels (int): Number of output channels (default: 3 for RGB-like)
+        
+    Examples:
+        >>> # Standard ViT-B/16 variant
+        >>> dino_input = DINOInputLayer(dino_variant='vitb16')
+        >>> x = torch.randn(2, 3, 640, 640)  # Input image
+        >>> enhanced_x = dino_input(x)       # Enhanced before first conv
+        >>> print(enhanced_x.shape)  # [2, 3, 640, 640] - ready for layer 0
+        
+        >>> # Large ViT variant for better features
+        >>> dino_input = DINOInputLayer(dino_variant='vitl16', freeze_dino=False)
+        
+        >>> # ConvNeXt variant for different architecture
+        >>> dino_input = DINOInputLayer(dino_variant='convnext_base')
+    """
+    
+    def __init__(self, dino_variant='vitb16', freeze_dino=True, output_channels=3):
+        super().__init__()
+        
+        # Force DINOv3 for input layer
+        self.dino_version = 3
+        self.dino_variant = dino_variant
+        self.freeze_dino = freeze_dino
+        self.output_channels = output_channels
+        
+        # Always use DINO3 for input layer
+        from ultralytics.nn.modules.block import DINO3Backbone
+        self.dino_backbone = DINO3Backbone(
+            model_name=f'dinov3_{dino_variant}',
+            freeze_backbone=freeze_dino,
+            output_channels=512  # Standard intermediate size
+        )
+        
+        # Feature projection layers will be created dynamically
+        self.feature_projection = None
+        self.spatial_upsample = None
+        self.output_projection = None
+        
+        print(f"DINOInputLayer initialized: DINOv3-{dino_variant} (pre-first-conv preprocessing)")
+        
+    def _create_projection_layers(self, dino_features, target_size):
+        """Create projection layers based on DINO feature dimensions."""
+        B, C, H, W = dino_features.shape
+        target_h, target_w = target_size
+        
+        # Feature projection from DINO embedding dim to intermediate channels
+        intermediate_channels = min(256, C // 2)
+        self.feature_projection = nn.Sequential(
+            nn.Conv2d(C, intermediate_channels, 1),
+            nn.BatchNorm2d(intermediate_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(intermediate_channels, intermediate_channels // 2, 3, padding=1),
+            nn.BatchNorm2d(intermediate_channels // 2),
+            nn.ReLU(inplace=True)
+        ).to(dino_features.device)
+        
+        # Spatial upsampling to match target size
+        if H != target_h or W != target_w:
+            self.spatial_upsample = nn.Upsample(
+                size=(target_h, target_w), 
+                mode='bilinear', 
+                align_corners=False
+            )
+        
+        # Output projection to target channels
+        self.output_projection = nn.Sequential(
+            nn.Conv2d(intermediate_channels // 2, self.output_channels, 3, padding=1),
+            nn.BatchNorm2d(self.output_channels),
+            nn.Sigmoid()  # Normalize to [0,1] like image data
+        ).to(dino_features.device)
+        
+    def forward(self, x):
+        """
+        Forward pass: Apply DINO feature extraction and project back to RGB-like format.
+        
+        Args:
+            x: Input tensor [B, 3, H, W] (raw input image)
+            
+        Returns:
+            Enhanced tensor [B, output_channels, H, W] ready for first conv layer (layer 0)
+        """
+        B, C, H, W = x.shape
+        
+        # Store original input for residual connection
+        original_input = x
+        
+        # Get DINO features
+        dino_features = self.dino_backbone(x)
+        
+        # Handle different DINO output formats
+        if isinstance(dino_features, (list, tuple)):
+            # Take the first/main feature map
+            dino_features = dino_features[0]
+        
+        # Create projection layers if needed
+        if self.feature_projection is None:
+            self._create_projection_layers(dino_features, (H, W))
+        
+        # Project DINO features
+        projected = self.feature_projection(dino_features)
+        
+        # Upsample to match input size if needed
+        if self.spatial_upsample is not None:
+            projected = self.spatial_upsample(projected)
+        
+        # Project to output channels
+        enhanced_features = self.output_projection(projected)
+        
+        # Residual connection with original input
+        if self.output_channels == 3:
+            # Normalize original input to [0,1] if needed
+            original_normalized = torch.clamp(original_input, 0, 1)
+            
+            # For RGB output, blend with original (both in [0,1] range)
+            alpha = 0.3  # Mixing ratio for enhanced features
+            output = alpha * enhanced_features + (1 - alpha) * original_normalized
+            
+            # Ensure final output is in valid range
+            output = torch.clamp(output, 0, 1)
+        else:
+            # For different channel count, just return enhanced features
+            output = enhanced_features
+            
+        return output

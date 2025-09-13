@@ -63,7 +63,8 @@ from .block import (
     FullPAD_Tunnel,
     DSC3k2,
     DINO2Backbone,
-    DINO3Backbone
+    DINO3Backbone,
+    DINOInputLayer
 )
 from .conv import (
     CBAM,
@@ -175,5 +176,6 @@ __all__ = (
     "DSC3k2",
     "DSConv",
     "DINO2Backbone",
-    "DINO3Backbone"
+    "DINO3Backbone",
+    "DINOInputLayer"
 )
